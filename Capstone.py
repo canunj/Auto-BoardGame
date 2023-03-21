@@ -87,6 +87,12 @@ Tgen = Title_Generator('C:\\Users\\Taylor School\\Downloads\\base_t5_v2\\base_t5
 
 category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
 
+ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
+            "[Cc]ivilization [Ii][Ii][Ii]","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
+            "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
+            "[Aa]ge [Oo]f [Ee]mpires [Ii][Ii]: [Tt]he [Aa]ge [Oo]f [Kk]ings","[Aa]ge [Oo]f [Ee]mpires 2: [Tt]he [Aa]ge [Oo]f [Kk]ings",
+            "[Aa]ge [Oo]f [Ee]mpires"] 
+
 iman = input_manager(vector_df, slim_df, search_tokens)
 
 #cooperative?, Gametype, Mechanic, Category, family
@@ -231,10 +237,12 @@ while True:
             mctrl.prompt_formatter(ks)
             desc = mctrl.call_api()
             clean_desc = mctrl.resp_cleanup(desc)
-            title = Tgen.candidate_generator(clean_desc)[0]
+            inter_pair = Tgen.candidate_generator(clean_desc)
+            Tgen.candidate_generator(inter_pair,ex_check)
+            output = Tgen.title_check()
             print(desc, title[title_next])
-            window['-Title_OUTPUT-'].update(title[title_next])
-            window['-Desc_OUTPUT-'].update(clean_desc)
+            window['-Title_OUTPUT-'].update(output[0])
+            window['-Desc_OUTPUT-'].update(output[1])
 
 
     if event == 'Expeditions':
@@ -253,18 +261,14 @@ while True:
         window['-Title_OUTPUT-'].update(title[next])
 
     if event == 'Show Me The Next Title':
-        try:
-            next += 1
-            window['-Title_OUTPUT-'].update(title[next])
-        except:
-            window['-Title_OUTPUT-'].update('Please Press "Get Title"')
+        output = Tgen.title_check(next=1)
+        window['-Title_OUTPUT-'].update(output[0])
+        window['-Desc_OUTPUT-'].update(output[1])
     
     if event == 'Show Me The Previous Title':
-        try:
-            next -= 1
-            window['-Title_OUTPUT-'].update(title[next])
-        except:
-            window['-Title_OUTPUT-'].update('Please Press "Get Title"')
+        output = Tgen.title_check(next=-1)
+        window['-Title_OUTPUT-'].update(output[0])
+        window['-Desc_OUTPUT-'].update(output[1])
 
     if event == 'Get Title':
         next = 0

@@ -22,7 +22,7 @@ from spacy.tokens import DocBin
 import torch
 from torch import nn
 import torch.nn.functional as F
-from transformers import T5ForConditionalGeneration,T5Tokenizer, GPT2Tokenizer
+from transformers import T5ForConditionalGeneration,T5Tokenizer
 import urllib.request
 import pickle
 import gzip
@@ -30,8 +30,6 @@ import io
 import sklearn
 import openai
 from operator import itemgetter
-from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead, create_reference_model
-from trl.core import respond_to_batch
 
 #user input manager class
 class input_manager:

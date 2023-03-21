@@ -1,5 +1,5 @@
 def SEND_KEY():
-    KEY = "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"
+    KEY = "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"
     return KEY
 
 def SEND_MODEL():
