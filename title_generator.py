@@ -106,7 +106,10 @@ class Title_Generator:
         clean_cand_step = list(set([game[0] for game in list(zip(candidates[0],[len(slim_df[slim_df.name.isin([x])]) for x in candidates[0]])) if game[1]==0]))
         clean_cand_step = transform(clean_cand_step)
 
-        clean_cand_step = [re.sub(re.compile("(?<=[a-z])'S"),"'s",re.sub(re.compile("(?<=[ ])Of(?=[ ])"),"of",x)) for x in clean_cand_step]
+        clean_cand_step = [re.sub(re.compile("(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)"),"",
+                                  re.sub(re.compile("(?<=[a-z])'S"),"'s",
+                                  re.sub(re.compile("(?<=[ ])Of(?=[ ])"),"of",x))) 
+                                  for x in clean_cand_step]
 
         
         clean_cand = []
