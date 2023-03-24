@@ -146,14 +146,14 @@ class model_control:
   def prompt_formatter(self,ks): 
     self.prompt = ". ".join(ks) + "\n\n###\n\n"
 
-  def call_api(self,temp=0.8):
+  def call_api(self,temp=0.5,pres=0.8):
     answer = openai.Completion.create(
       model=self.model,
       prompt=self.prompt,
       max_tokens=512,
       temperature=temp,
       stop=["END"],
-      presence_penalty=0.8,
+      presence_penalty=pres,
       frequency_penalty=0.5
     )
     return answer['choices'][0]['text']
