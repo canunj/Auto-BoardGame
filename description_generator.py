@@ -93,21 +93,21 @@ class input_manager:
     ks = [k for k,v in in_vec.items() if v == 1]
 
     #finding raw "total" match score - how many of the how input columns are hot in each existing vector
-    inter = self.key_df[ks].sum(axis=1)
+    #inter = self.key_df[ks].sum(axis=1)
     
     #performing operation on each df seems to be slightly quicker than transforming the df here - may refactor though
     
     #dropping any row without 3 matches (our minimum input)
-    cand_vec = self.key_df.iloc[list(inter[inter>=3].index)]
+    #cand_vec = self.key_df.iloc[list(inter[inter>=3].index)]
     #if parsing returns less ranked matches than specificed top n, reduce threshold to 1 match and check again
-    if len(cand_vec) < self.top_n:
-        cand_vec = self.key_df.iloc[list(inter[inter>=1].index)]
+    #if len(cand_vec) < self.top_n:
+    #    cand_vec = self.key_df.iloc[list(inter[inter>=1].index)]
 
-    cand_slim = self.slim_df.iloc[list(inter[inter>=3].index)]
-    if len(cand_slim) < self.top_n:
-        cand_slim = self.key_df.iloc[list(inter[inter>=1].index)]
+    #cand_slim = self.slim_df.iloc[list(inter[inter>=3].index)]
+    #if len(cand_slim) < self.top_n:
+    #    cand_slim = self.key_df.iloc[list(inter[inter>=1].index)]
 
-    return cand_slim, cand_vec, list(in_vec.values()), ks
+    return ks #cand_slim, cand_vec, list(in_vec.values())
 
   #calculating per community vector pairwise jaccard similarity to input split by feature class
   def ret_jaccard(self,in_vec,t_vec):
@@ -146,7 +146,17 @@ class model_control:
   def prompt_formatter(self,ks): 
     self.prompt = ". ".join(ks) + "\n\n###\n\n"
 
-  def call_api(self,temp=0.5,pres=0.8):
+  def call_api(self,status='1st'):
+    if status == '1st':
+      temp=0.5
+      pres=0.7
+    elif status == '2nd':
+      temp=0.4
+      pres=0.6
+    elif status == '3rd':
+      temp=0.5
+      pres=0.8
+    
     answer = openai.Completion.create(
       model=self.model,
       prompt=self.prompt,

@@ -70,8 +70,6 @@ class Title_Generator:
             res = self.tokenizer.decode(result).replace('<pad> ','').replace('</s>','').replace('<pad>','')
             candidates.append(res)
 
-        candidates = list(set([game[0] for game in list(zip(self.candidates,[len(self.game_df[self.game_df.name.isin([x])]) for x in self.candidates])) if game[1]==0]))
-
         return candidates, description
     
     def candidate_score(self,candidates,ex_check=None):
@@ -80,6 +78,7 @@ class Title_Generator:
         
         if ex_check != None:
             pat = re.compile("((?:" + "|".join(map(re.escape, candidates[0]+[cand.upper() for cand in candidates[0]])) + "|" + "|".join(ex_check) +"))")
+            desc = re.sub(pat, "__", candidates[1])
         else:
             pat = re.compile("((?:" + "|".join(map(re.escape, candidates[0]+[cand.upper() for cand in candidates[0]])) + "))")
             desc = re.sub(pat, "__", candidates[1])
@@ -103,7 +102,7 @@ class Title_Generator:
             S = set(L)
             return [item.title() for item in L if item.lower() not in S and not S.add(item.lower())]
         
-        clean_cand_step = list(set([game[0] for game in list(zip(candidates[0],[len(slim_df[slim_df.name.isin([x])]) for x in candidates[0]])) if game[1]==0]))
+        clean_cand_step = list(set([game[0] for game in list(zip(candidates[0],[len(self.game_df[self.game_df.name.isin([x])]) for x in candidates[0]])) if game[1]==0]))
         clean_cand_step = transform(clean_cand_step)
 
         clean_cand_step = [re.sub(re.compile("(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)"),"",
