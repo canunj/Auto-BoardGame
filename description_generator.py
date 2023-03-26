@@ -107,7 +107,7 @@ class input_manager:
     #if len(cand_slim) < self.top_n:
     #    cand_slim = self.key_df.iloc[list(inter[inter>=1].index)]
 
-    return ks #cand_slim, cand_vec, list(in_vec.values())
+    return ks
 
   #calculating per community vector pairwise jaccard similarity to input split by feature class
   def ret_jaccard(self,in_vec,t_vec):
