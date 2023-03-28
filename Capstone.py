@@ -1,3 +1,7 @@
+#Icons Attribution
+#<a href="https://www.flaticon.com/free-icons/beaker" title="beaker icons">Beaker icons created by Freepik - Flaticon</a>
+#<a href="https://www.flaticon.com/free-icons/life-preserver" title="life preserver icons">Life preserver icons created by Monomal - Flaticon</a>
+
 import PySimpleGUI as sg
 import pandas as pd
 import numpy as np
@@ -17,7 +21,7 @@ import gzip
 import io
 from spacy.tokens import DocBin
 from description_generator import input_manager, model_control
-import  Model_Constants as mc
+import Model_Constants as mc
 
 #non-ui helper functions
 def reader(url):
@@ -110,7 +114,16 @@ coop = 0
 input = []
 
 title = 'Auto-BG: The Game Concept Generator'
-main_text = "Discover the concept for your next favorite game!\n\nTake your ideas and turn them into a full-fledged tabletop game concept through the power of deep learning! \n\nHow do you use Auto-BG? \nPick any set of choices from four selectors below: Family, Game, Mechanic, and Category.\nThen, if you are looking to lose together, activate the toggle for a cooperative game!\n\n Need more detail?\n\nFamily: Descriptive niches for grouping games\nGame Type: Top level genres - Family, Strategy, etc.\nMechanic: Game rules!\nCategory: The primary genres\n\nNeed a guided walkthrough or want to see how Auto-BG performs on a known game?\nPress the lifepreserver button in the top left corner!" 
+help_text = "Discover the concept for your next favorite game!\n\nTake your ideas and turn them into a full-fledged tabletop game concept through the power of deep learning! \n\nHow do you use Auto-BG? \nPick any set of choices from four selectors below: Family, Game, Mechanic, and Category.\nThen, if you are looking to lose together, activate the toggle for a cooperative game!\n\n Need more detail?\n\nFamily: Descriptive niches for grouping games\nGame Type: Top level genres - Family, Strategy, etc.\nMechanic: Game rules!\nCategory: The primary genres\n\nNeed a guided walkthrough or want to see how Auto-BG performs on a known game?\nPress the lifepreserver button in the top left corner!" 
+ds_text = 'Describes how this works'
+about_text = 'Maybe a small blurb about each of us and a button to our linked ins'
+set_text = 'Any settings we want to make avaiable to the user'
+
+h = 1
+ds = 0
+abt = 0
+sttngs = 0
+
 
 #Step 0 additive/subtractive layout
 
@@ -163,21 +176,32 @@ def MechBox(x):
 
 def make_window():
 
-    layout_title = [sg.Text(title, expand_x=True, font='Helvetica 25', justification='c')]
-
-    layout_main_text = [sg.Text(main_text, expand_x=True, font='Helvetica 10', justification='c')]
+    layout_title = [sg.Button(key='-Help-', border_width=0, image_filename='rubber-ring.png', button_color=(sg.theme_background_color(), sg.theme_background_color())),
+                    sg.Button(key='-DS-', border_width=0, image_filename='beaker.png', button_color=(sg.theme_background_color(), sg.theme_background_color())),
+                    sg.Text(title, expand_x=True, font='Helvetica 25', justification='c'),
+                    sg.Button(key='-About-', border_width=0, image_filename='interrogation.png', button_color=(sg.theme_background_color(), sg.theme_background_color())),
+                    sg.Button(key='-Settings-', border_width=0, image_filename='settings.png', button_color=(sg.theme_background_color(), sg.theme_background_color()))       
+                    ]
+    
+    if h == 1:
+        layout_main_text = [sg.Text(help_text, expand_x=True, font='Helvetica 10', justification='c')]
+    elif ds == 1:
+        layout_main_text = [sg.Text(ds_text, expand_x=True, font='Helvetica 10', justification='c')]
+    elif abt == 1:
+        layout_main_text = [sg.Text(about_text, expand_x=True, font='Helvetica 10', justification='c')]
+    elif sttngs == 1:
+        layout_main_text = [sg.Text(set_text, expand_x=True, font='Helvetica 10', justification='c')]
+    else:
+        layout_main_text = [sg.Text(help_text, expand_x=True, font='Helvetica 10', justification='c')]
 
     layout_top_controls = sg.Frame('Inputs',  [
                     [sg.Col([FamilyBox(x) for x in range(0,family_c+1)], vertical_alignment='bottom'),
                     sg.Col([GameBox(x) for x in range(0,game_c+1)], vertical_alignment='bottom'),
                     sg.Col([CatBox(x) for x in range(0,cat_c+1)], vertical_alignment='bottom'),
                     sg.Col([MechBox(x) for x in range(0,mech_c+1)], vertical_alignment='bottom')],
-                    [sg.Checkbox('Cooperative?', key='CoopCheck', default=coop)],
-                    [sg.Button('Run')]
+                    [sg.Checkbox('Cooperative?', key='CoopCheck', default=coop)]
 
                 ], border_width=2, font='Helvetica 18', expand_x=True, title_location='n', element_justification ='c')
-    
-    space0 = [sg.Text('_'*100, expand_x=True, font='Helvetica 10', justification='c')]
 
     gen_title =  sg.Frame('Title',
                           [
@@ -188,10 +212,10 @@ def make_window():
 
     gen_desc=  sg.Frame('Description',
                           [
-                    [sg.Text(key='-Desc_OUTPUT-', expand_x=True, font='Helvetica 18', justification='c')],
+                    [sg.Text(key='-Desc_OUTPUT-', expand_y=True, auto_size_text=True, font='Helvetica 18', justification='c')],
                     [sg.Col([[sg.Button('Show Me The Previous Description'), sg.Text(' ' * 100), sg.Button('Show Me The Next Description')]], justification='c')]
 
-                ], border_width=1, font='Helvetica 18', title_location='n', element_justification ='c')
+                ], border_width=1, font='Helvetica 18', expand_x=True, title_location='n', element_justification ='c')
 
     layout_bottom = [ 
                 [sg.Text('Description Test')],
@@ -203,7 +227,7 @@ def make_window():
             ]
 
     layout = [
-               [layout_title] + [space0] + [layout_main_text] + [[layout_top_controls]] + [[gen_title]] + [[gen_desc]]
+               [layout_title] + [layout_main_text] + [[layout_top_controls]] + [[gen_title]] + [[gen_desc]] + [sg.Button('Run', size=(15,2))]
             ]
 
     #STEP 2 - create the window
@@ -230,12 +254,76 @@ while True:
         if input  == revert_cats(game_v, mech_v, cat_v, family_v, coop):
             print('Already  Ran')
         else:
-            title_next =  0
+            desc_next = 0
             input = revert_cats(game_v, mech_v, cat_v, family_v, coop)
             ks = iman.input_parser(iman.set_input(input))
             mctrl = model_control(mc.SEND_KEY())
             mctrl.prompt_formatter(ks)
-            desc = mctrl.call_api(status='1st')
+            desc = mctrl.call_api(status=desc_next)
+            clean_desc = mctrl.resp_cleanup(desc)
+            inter_pair = Tgen.candidate_generator(clean_desc)
+            Tgen.candidate_score(inter_pair,ex_check)
+            output = Tgen.title_check()
+            window['-Title_OUTPUT-'].update(output[0])
+            window['-Desc_OUTPUT-'].update(output[1])
+
+
+    if event == 'Settlers of Catan':
+        next = 0
+        title = Tgen.candidate_generator(exp)[0]
+        window['-Title_OUTPUT-'].update(title[next])
+
+    if event == 'Ticket to Ride':
+        next = 0
+        title = Tgen.candidate_generator(san)[0]
+        window['-Title_OUTPUT-'].update(title[next])
+
+    if event == 'Pandemic':
+        next = 0
+        title = Tgen.candidate_generator(sky)[0]
+        window['-Title_OUTPUT-'].update(title[next])
+
+    if event == 'Show Me The Next Title':
+        try:
+            output = Tgen.title_check(next=1)
+            window['-Title_OUTPUT-'].update(output[0])
+            window['-Desc_OUTPUT-'].update(output[1])
+        except:
+            exit
+    
+    if event == 'Show Me The Previous Title':
+        try:
+            output = Tgen.title_check(next=-1)
+            window['-Title_OUTPUT-'].update(output[0])
+            window['-Desc_OUTPUT-'].update(output[1])
+        except:
+            exit
+
+    if event == 'Show Me The Next Description':
+        try:
+            title_next =  0
+            if desc_next == 2:
+                desc_next = 0
+            else:
+                desc_next += 1
+            desc = mctrl.call_api(status=desc_next)
+            clean_desc = mctrl.resp_cleanup(desc)
+            inter_pair = Tgen.candidate_generator(clean_desc)
+            Tgen.candidate_score(inter_pair,ex_check)
+            output = Tgen.title_check()
+            window['-Title_OUTPUT-'].update(output[0])
+            window['-Desc_OUTPUT-'].update(output[1])
+        except:
+            exit
+    
+    if event == 'Show Me The Previous Description':
+        try:
+            title_next =  0
+            if desc_next == 0:
+                desc_next = 2
+            else:
+                desc_next -= 1
+            desc = mctrl.call_api(status=desc_next)
             clean_desc = mctrl.resp_cleanup(desc)
             inter_pair = Tgen.candidate_generator(clean_desc)
             Tgen.candidate_score(inter_pair,ex_check)
@@ -243,37 +331,8 @@ while True:
             print(desc, title[title_next])
             window['-Title_OUTPUT-'].update(output[0])
             window['-Desc_OUTPUT-'].update(output[1])
-
-
-    if event == 'Expeditions':
-        next = 0
-        title = Tgen.candidate_generator(exp)[0]
-        window['-Title_OUTPUT-'].update(title[next])
-
-    if event == 'Sankokushin: Five Sacrifices':
-        next = 0
-        title = Tgen.candidate_generator(san)[0]
-        window['-Title_OUTPUT-'].update(title[next])
-
-    if event == 'Skyrise':
-        next = 0
-        title = Tgen.candidate_generator(sky)[0]
-        window['-Title_OUTPUT-'].update(title[next])
-
-    if event == 'Show Me The Next Title':
-        output = Tgen.title_check(next=1)
-        window['-Title_OUTPUT-'].update(output[0])
-        window['-Desc_OUTPUT-'].update(output[1])
-    
-    if event == 'Show Me The Previous Title':
-        output = Tgen.title_check(next=-1)
-        window['-Title_OUTPUT-'].update(output[0])
-        window['-Desc_OUTPUT-'].update(output[1])
-
-    if event == 'Get Title':
-        next = 0
-        title = Tgen.candidate_generator(values['-IN-'])[0]
-        window['-Title_OUTPUT-'].update(title[next])
+        except:
+            exit
 
     if event == '+family':
         if family_c < 6:
@@ -324,6 +383,38 @@ while True:
     if event == '-mech':
         mech_c  -= 1
         mech_v.pop()
+        window.close()
+        window = make_window()
+
+    if event == '-Help-':
+        h = 1
+        ds = 0
+        abt = 0
+        sttngs = 0
+        window.close()
+        window = make_window()
+
+    if event == '-DS-':
+        h = 0
+        ds = 1
+        abt = 0
+        sttngs = 0
+        window.close()
+        window = make_window()
+
+    if event == '-About-':
+        h = 0
+        ds = 0
+        abt = 1
+        sttngs = 0
+        window.close()
+        window = make_window()
+
+    if event == '-Settings-':
+        h = 0
+        ds = 0
+        abt = 0
+        sttngs = 1
         window.close()
         window = make_window()
 

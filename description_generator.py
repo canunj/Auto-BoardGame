@@ -146,14 +146,14 @@ class model_control:
   def prompt_formatter(self,ks): 
     self.prompt = ". ".join(ks) + "\n\n###\n\n"
 
-  def call_api(self,status='1st'):
-    if status == '1st':
+  def call_api(self,status=0):
+    if status == 0:
       temp=0.5
       pres=0.7
-    elif status == '2nd':
+    elif status == 1:
       temp=0.4
       pres=0.6
-    elif status == '3rd':
+    elif status == 2:
       temp=0.5
       pres=0.8
     

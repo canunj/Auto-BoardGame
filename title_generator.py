@@ -161,4 +161,17 @@ class Title_Generator:
         self.best_title = self.out_titles[self.title_iter][0]
         desc = re.sub(re.compile("__"),self.best_title,self.description)  
         
-        return self.best_title, desc.lstrip()
+        r_desc =  ''
+        wl = 0
+        ll = 0
+
+        for word in desc.split(' '):
+            wl += len(word)
+            if ((wl/80)  - ll) > 1:
+                ll += 1
+                r_desc += word+'\n'
+            else:
+                r_desc +=  word+' '
+
+
+        return self.best_title, r_desc.lstrip()
