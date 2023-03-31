@@ -36,9 +36,11 @@ To implement a new instance of Auto-BG, follow these steps:
 2. Install the required packages listed in both 'requirements.txt' files using pip
 3. Download the trained T5 model or provide a path to an alternate T5 model.
 4. Placing the JSON data file in Stream_to_Output, run GameCleaner.py - this provides all required data files.
+
 5. Prepare training prompts - convert all active keys to period stopped tokens in a string for each game.
 6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
-7. 6a. Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+NOTE: Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+
 8. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
 9. You now have a customized instance of Auto-BG!
 
