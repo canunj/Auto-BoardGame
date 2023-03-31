@@ -57,15 +57,31 @@ def application():
 
         final_list = [gt,mec,cat,fam, co]
         return [item for sublist in final_list for item in sublist]
+    
+    def builder(ip, dn):
+        ks = iman.input_parser(iman.set_input(ip))
+        mctrl.prompt_formatter(ks)
+        desc = mctrl.call_api(status=dn)
+        clean_desc = mctrl.resp_cleanup(desc)
+        inter_pair = Tgen.candidate_generator(clean_desc)
+        Tgen.candidate_score(inter_pair,ex_check)
+        output = Tgen.title_check()
+        return output
 
     ###Variables
 
     ###Data
-    slim_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
-    search_tokens = token_expand("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/token_search.gz?raw=true")
-    vector_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
-    category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
-    coop = [1,0]
+    @st.cache_resource
+    def fetch_data():
+        slim_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
+        search_tokens = token_expand("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/token_search.gz?raw=true")
+        vector_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
+        category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
+        coop = [1,0]
+        st.sidebar.success("Fetched Data!")
+        return slim_df, search_tokens, vector_df, category_keys, coop
+    
+    slim_df, search_tokens, vector_df, category_keys, coop = fetch_data()
 
     #Is this needed????
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
@@ -75,14 +91,30 @@ def application():
             "[Aa]ge [Oo]f [Ee]mpires"] 
 
     ###Models
-    Tgen = Title_Generator('./t5_model', slim_df)
-    iman = input_manager(vector_df, slim_df, search_tokens)
+    @st.cache_resource
+    def setup_models():
+        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
 
+    Tgen, iman, mctrl = setup_models()
+    
     #UI Variables
-    input = []
-    output_dict = {}
+    if 'desc_next' not in st.session_state:
+        st.session_state.desc_next = 0
+    if 'inputs' not in st.session_state:
+        st.session_state.inputs = []
+
+    @st.cache_resource
+    def model_output():
+        return {}
+    output_dict = model_output()
+
     Title_v = False
     Desc_v = False
+
+    ###ui helper functions
+    def show_title(dn, increment):
+            global output_dict
+            output_dict[dn] = Tgen.title_check(next=increment)
 
     #UI
 
@@ -108,11 +140,34 @@ def application():
         )
     
     st.sidebar.success("Select a demo below.")
+    print(output_dict)
+    if len(output_dict) == 0:
+        print('WOW')
+        with st.expander('Results', expanded=True):
+            title_placeholder = st.container()
+            desc_placeholder = st.container()
+    else:
+        with st.expander('Results', expanded=True):
+            st.write(
+                    """
+                    #### Title:
+                    """)
+            st.write(output_dict[st.session_state.desc_next][0])
 
-    with st.expander('Results', expanded=True):
-        title_placeholder = st.container()
-        desc_placeholder = st.container()
-    
+            t_col1, t_col2 = st.columns(2)
+
+            with t_col1:
+                st.button("See Previous Title", on_click=show_title(st.session_state.desc_next, -1))
+
+            with t_col2:
+                st.button("See Next Title", on_click=show_title(st.session_state.desc_next, 1))
+
+            st.write(
+                    """
+                    ####  Description:
+                    """)
+            st.write(output_dict[st.session_state.desc_next][1])
+
     #Form
     with st.form("Auto-BG"):
 
@@ -137,34 +192,37 @@ def application():
         run = st.form_submit_button("Run Model")
 
         if run:
-            if input  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
+            if st.session_state.inputs  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
                 st.write('Already  Ran')
             else:
-                desc_next = 0
-                input = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
-                ks = iman.input_parser(iman.set_input(input))
-                mctrl = model_control(mc.SEND_KEY())
-                mctrl.prompt_formatter(ks)
-                desc = mctrl.call_api(status=desc_next)
-                clean_desc = mctrl.resp_cleanup(desc)
-                inter_pair = Tgen.candidate_generator(clean_desc)
-                Tgen.candidate_score(inter_pair,ex_check)
-                output = Tgen.title_check()
-                output_dict[desc_next] = output
-                print(output)
+                st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
+                output_dict[st.session_state.desc_next] = builder(st.session_state.inputs, st.session_state.desc_next)
                 title_placeholder.write(
                     """
                     #### Title:
                     """)
-                title_placeholder.write(output_dict[desc_next][0])
+                title_placeholder.write(output_dict[st.session_state.desc_next][0])
+                
+                t_col1, t_col2 = st.columns(2)
+
+                with t_col1:
+                    title_placeholder.button("See Previous Title", on_click=show_title(st.session_state.desc_next, -1))
+
+                with t_col2:
+                    title_placeholder.button("See Next Title", on_click=show_title(st.session_state.desc_next, 1))
+
                 desc_placeholder.write(
                     """
                     ####  Description:
                     """)
-                desc_placeholder.write(output_dict[desc_next][1])
+                desc_placeholder.write(output_dict[st.session_state.desc_next][1])
+
+def demo():
+    st.text('This is demo, wow more changes')
 
 page_names_to_funcs = {
-    "Application": application
+    "Application": application,
+    "Demo": demo
 }
 
 demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
