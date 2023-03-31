@@ -58,15 +58,48 @@ def application():
         final_list = [gt,mec,cat,fam, co]
         return [item for sublist in final_list for item in sublist]
     
-    def builder(ip, dn):
+    def builder(ip):
         ks = iman.input_parser(iman.set_input(ip))
         mctrl.prompt_formatter(ks)
-        desc = mctrl.call_api(status=dn)
-        clean_desc = mctrl.resp_cleanup(desc)
-        inter_pair = Tgen.candidate_generator(clean_desc)
-        Tgen.candidate_score(inter_pair,ex_check)
-        output = Tgen.title_check()
-        return output
+        descs = []
+        for status in np.arange(0,3):
+            desc = mctrl.call_api(status=status)
+            clean_desc = mctrl.resp_cleanup(desc)
+            inter_pair = Tgen.candidate_generator(clean_desc)
+            out = Tgen.candidate_score(inter_pair,ex_check)
+            descs.append(out)
+            st.sidebar.success("Prompt " +str(status+1)+ " generated!")
+        st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
+
+
+    def title_check(next=1):
+        if next==1:
+            if st.session_state.title_iter == len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1:
+                st.session_state.title_iter = 0
+            else:
+                st.session_state.title_iter+=1
+        elif next==-1:
+            if st.session_state.title_iter == 0:
+                st.session_state.title_iter = len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1
+            else:
+                st.session_state.title_iter-=1
+        cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
+        desc = re.sub(re.compile("__"),cur_title,st.session_state.output_dict[st.session_state.desc_iter]['text'])  
+        
+        r_desc =  ''
+        wl = 0
+        ll = 0
+
+        for word in desc.split(' '):
+            wl += len(word)
+            if ((wl/80)  - ll) > 1:
+                ll += 1
+                r_desc += word+'\n'
+            else:
+                r_desc +=  word+' '
+
+
+        return (cur_title, r_desc.lstrip())
 
     ###Variables
 
@@ -98,23 +131,29 @@ def application():
     Tgen, iman, mctrl = setup_models()
     
     #UI Variables
-    if 'desc_next' not in st.session_state:
-        st.session_state.desc_next = 0
+    if 'desc_iter' not in st.session_state:
+        st.session_state.desc_iter = 0
+    if 'title_iter' not in st.session_state:
+        st.session_state.title_iter = -1
+    if 'output_dict' not in st.session_state:
+        st.session_state.output_dict = {}
     if 'inputs' not in st.session_state:
-        st.session_state.inputs = []
-
-    @st.cache_resource
-    def model_output():
-        return {}
-    output_dict = model_output()
+        st.session_state.inputs= []
+    
+    
+    st.session_state.cur_pair = ("","Run me!")
+    
 
     Title_v = False
     Desc_v = False
 
     ###ui helper functions
-    def show_title(dn, increment):
-            global output_dict
-            output_dict[dn] = Tgen.title_check(next=increment)
+    def show_title(val): 
+        out = title_check(next=val)
+        st.session_state.cur_pair = out
+        print('runnin')
+
+
 
     #UI
 
@@ -140,33 +179,55 @@ def application():
         )
     
     st.sidebar.success("Select a demo below.")
-    print(output_dict)
-    if len(output_dict) == 0:
-        print('WOW')
-        with st.expander('Results', expanded=True):
+    with st.expander('Results', expanded=True):
+        t_col1, t_col2 = st.columns(2)
+        d_col1, d_col2 = st.columns(2)
+        
+        if 'title_placeholder' in locals():
+            pass
+        else:
             title_placeholder = st.container()
             desc_placeholder = st.container()
-    else:
-        with st.expander('Results', expanded=True):
-            st.write(
-                    """
-                    #### Title:
-                    """)
-            st.write(output_dict[st.session_state.desc_next][0])
 
-            t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            if st.button("See Previous Title"):
+                show_title(-1)
 
-            with t_col1:
-                st.button("See Previous Title", on_click=show_title(st.session_state.desc_next, -1))
+        with t_col2:
+            if st.button("See Next Title"):
+                show_title(1)
 
-            with t_col2:
-                st.button("See Next Title", on_click=show_title(st.session_state.desc_next, 1))
+        with d_col1:
+            if st.button("See Previous Description"):
+                if st.session_state.desc_iter == 0:
+                    st.session_state.desc_iter = 2
+                    st.session_state.title_iter = -1
+                else:
+                    st.session_state.desc_iter -= 1
+                    st.session_state.title_iter = -1
+                show_title(1)
 
-            st.write(
-                    """
-                    ####  Description:
-                    """)
-            st.write(output_dict[st.session_state.desc_next][1])
+        with d_col2:
+            if st.button("See Next Description"):
+                if st.session_state.desc_iter == 2:
+                    st.session_state.desc_iter = 0
+                    st.session_state.title_iter = -1
+                else:
+                    st.session_state.desc_iter += 1
+                    st.session_state.title_iter = -1
+                show_title(1)
+
+        title_placeholder.write(
+                """
+                #### Title:
+                """)
+        title_placeholder.write(st.session_state.cur_pair[0])
+
+        desc_placeholder.write(
+                """
+                ####  Description:
+                """)
+        desc_placeholder.write(st.session_state.cur_pair[1])
 
     #Form
     with st.form("Auto-BG"):
@@ -195,27 +256,24 @@ def application():
             if st.session_state.inputs  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
                 st.write('Already  Ran')
             else:
+                st.session_state.output_dict = {}
+                st.session_state.title_iter = -1
+                st.session_state.desc_iter = 0
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
-                output_dict[st.session_state.desc_next] = builder(st.session_state.inputs, st.session_state.desc_next)
+                builder(st.session_state.inputs)
+                st.session_state.cur_pair = title_check()
                 title_placeholder.write(
                     """
                     #### Title:
                     """)
-                title_placeholder.write(output_dict[st.session_state.desc_next][0])
+                title_placeholder.write(st.session_state.cur_pair[0])
                 
-                t_col1, t_col2 = st.columns(2)
-
-                with t_col1:
-                    title_placeholder.button("See Previous Title", on_click=show_title(st.session_state.desc_next, -1))
-
-                with t_col2:
-                    title_placeholder.button("See Next Title", on_click=show_title(st.session_state.desc_next, 1))
 
                 desc_placeholder.write(
                     """
                     ####  Description:
                     """)
-                desc_placeholder.write(output_dict[st.session_state.desc_next][1])
+                desc_placeholder.write(st.session_state.cur_pair[1])
 
 def demo():
     st.text('This is demo, wow more changes')

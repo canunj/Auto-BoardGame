@@ -133,7 +133,7 @@ class Title_Generator:
 
         scores = [x if x !=0 else random.uniform(.3, .7) for x in [tok.similarity(doc) for tok in sim]]
         
-        self.out_titles = sorted(list(zip(clean_cand,scores)),key=itemgetter(1))
+        out_titles = sorted(list(zip(clean_cand,scores)),key=itemgetter(1))
         
         pat = re.compile("(?<=[!.?])(?=[^\s])")
         pat2 = re.compile("([Ff]rom the [Pp]ublisher[: ]|[Ff]rom the [Dd]esigner[: ]|[Gg]ame [Dd]escription)")
@@ -143,35 +143,4 @@ class Title_Generator:
         desc = re.sub(pat2,"",desc)
         desc = re.sub(pat3,"",desc)
         
-        self.description = desc
-
-    def title_check(self,next=1):
-        
-        if next==1:
-            if self.title_iter == len(self.out_titles)-1:
-                self.title_iter = 0
-            else:
-                self.title_iter+=1
-        elif next==-1:
-            if self.title_iter == 0:
-                self.title_iter = len(self.out_titles)-1
-            else:
-                self.title_iter-=1
-
-        self.best_title = self.out_titles[self.title_iter][0]
-        desc = re.sub(re.compile("__"),self.best_title,self.description)  
-        
-        r_desc =  ''
-        wl = 0
-        ll = 0
-
-        for word in desc.split(' '):
-            wl += len(word)
-            if ((wl/80)  - ll) > 1:
-                ll += 1
-                r_desc += word+'\n'
-            else:
-                r_desc +=  word+' '
-
-
-        return self.best_title, r_desc.lstrip()
+        return {'text':desc,'titles':out_titles}
