@@ -38,9 +38,9 @@ To implement a new instance of Auto-BG, follow these steps:
 4. Placing the JSON data file in Stream_to_Output, run GameCleaner.py - this provides all required data files.
 5. Prepare training prompts - convert all active keys to period stopped tokens in a string for each game.
 6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
-    6a. Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
-7. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
-8. You now have a customized instance of Auto-BG!
+7. 6a. Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+8. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
+9. You now have a customized instance of Auto-BG!
 
 ## Citations and Licensing
 Auto-BG is licensed under CC BY-NC-SA 2.0, original data sourced from Recommend.Games @GitLab
