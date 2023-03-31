@@ -10,27 +10,39 @@ The Auto-BG (Board Game) tool is a text generation tool for creating board game 
 - Features and Demo
 - Examples
 - Project Structure
-- Requirements and Installation
+- Customizing Auto-BG
 - Citations and Licensing
 
 ## Features and Demo
 The main features of this application include:
 
-A limited demo of the application may be found at (host website). Note, the application is limited to users with restricted access only.
+A user-friendly interface for Auto-BG can be found at (homepage).
 
 ## Examples
 
 ## Project Structure
 
-## Requirements and Installation
-In order to run this application, you will need the following:
-1.
-2.
-3.
+## Customizing Auto-BG
+NOTE: Auto-BG uses a fine-tuned GPT-3 Curie model that will be inaccessible without an organizational API key, 
+the below instructions are for advanced users interested in remixing Auto-BG with a new generator model.
 
-To install and use the application locally, follow these steps:
+In order to run this application, you will need the following:
+1. An OpenAI account and API key
+2. All libraries specified in both the primary and data processing requirements.txt files
+3. A raw stream JSON file of BoardGameGeek data, formatted to match output from the Recommend.Games scraper
+
+To implement a new instance of Auto-BG, follow these steps:
 1. Clone the repository onto your local machine
-2. Install the required packages listed in the 'requirements.txt' file using pip
-3. Downlaod the trained T5 and GPT-3 models into their respective folders
+2. Install the required packages listed in both 'requirements.txt' files using pip
+3. Download the trained T5 model or provide a path to an alternate T5 model.
+4. Placing the JSON data file in Stream_to_Output, run GameCleaner.py - this provides all required data files.
+
+5. Prepare training prompts - convert all active keys to period stopped tokens in a string for each game.
+6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
+NOTE: Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+
+8. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
+9. You now have a customized instance of Auto-BG!
 
 ## Citations and Licensing
+Auto-BG is licensed under CC BY-NC-SA 2.0, original data sourced from Recommend.Games @GitLab
