@@ -135,7 +135,7 @@ class model_control:
       text = " ".join([e+'.' for e in text.split('.')[0:-1] if e])
 
     sent = re.split(r'([.?!:])', text)
-    phrases = ["[Dd]esigned by","[Dd]esigner of","[Aa]rt by","[Aa]rtist of","[Pp]ublished"]
+    phrases = ["[Dd]esigned by","[Dd]esigner of","[Aa]rt by","[Aa]rtist of","[Pp]ublished","[Pp]ublisher of"]
 
     pat = re.compile("(?:" + "|".join(phrases) + ")")
     fix = re.compile("(?<=[.!?])[.!?]")
