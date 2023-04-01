@@ -86,20 +86,20 @@ def application():
         cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
         desc = re.sub(re.compile("__"),cur_title,st.session_state.output_dict[st.session_state.desc_iter]['text'])  
         
-        r_desc =  ''
-        wl = 0
-        ll = 0
+        #r_desc =  ''
+        #wl = 0
+        #ll = 0
 
-        for word in desc.split(' '):
-            wl += len(word)
-            if ((wl/80)  - ll) > 1:
-                ll += 1
-                r_desc += word+'\n'
-            else:
-                r_desc +=  word+' '
+        #for word in desc.split(' '):
+        #    wl += len(word)
+        #    if ((wl/80)  - ll) > 1:
+        #        ll += 1
+        #        r_desc += word+'\n'
+        #    else:
+        #        r_desc +=  word+' '
 
 
-        return (cur_title, r_desc.lstrip())
+        return (cur_title, desc.lstrip())
 
     ###Variables
 
@@ -118,7 +118,7 @@ def application():
 
     #Is this needed????
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
-            "[Cc]ivilization [Ii][Ii][Ii]","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
+            "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
             "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
             "[Aa]ge [Oo]f [Ee]mpires [Ii][Ii]: [Tt]he [Aa]ge [Oo]f [Kk]ings","[Aa]ge [Oo]f [Ee]mpires 2: [Tt]he [Aa]ge [Oo]f [Kk]ings",
             "[Aa]ge [Oo]f [Ee]mpires"] 
@@ -151,7 +151,6 @@ def application():
     def show_title(val): 
         out = title_check(next=val)
         st.session_state.cur_pair = out
-        print('runnin')
 
 
 

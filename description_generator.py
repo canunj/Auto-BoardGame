@@ -30,6 +30,7 @@ import io
 import sklearn
 import openai
 from operator import itemgetter
+import re
 
 #user input manager class
 class input_manager:
@@ -92,47 +93,7 @@ class input_manager:
     #extracting keys from processed vector
     ks = [k for k,v in in_vec.items() if v == 1]
 
-    #finding raw "total" match score - how many of the how input columns are hot in each existing vector
-    #inter = self.key_df[ks].sum(axis=1)
-    
-    #performing operation on each df seems to be slightly quicker than transforming the df here - may refactor though
-    
-    #dropping any row without 3 matches (our minimum input)
-    #cand_vec = self.key_df.iloc[list(inter[inter>=3].index)]
-    #if parsing returns less ranked matches than specificed top n, reduce threshold to 1 match and check again
-    #if len(cand_vec) < self.top_n:
-    #    cand_vec = self.key_df.iloc[list(inter[inter>=1].index)]
-
-    #cand_slim = self.slim_df.iloc[list(inter[inter>=3].index)]
-    #if len(cand_slim) < self.top_n:
-    #    cand_slim = self.key_df.iloc[list(inter[inter>=1].index)]
-
     return ks
-
-  #calculating per community vector pairwise jaccard similarity to input split by feature class
-  def ret_jaccard(self,in_vec,t_vec):
-    gt_score = sklearn.metrics.jaccard_score(in_vec[1:9],t_vec[1:9],zero_division=0)
-    cat_score = sklearn.metrics.jaccard_score(in_vec[192:276],t_vec[192:276],zero_division=0)
-    mech_score = sklearn.metrics.jaccard_score(in_vec[9:192],t_vec[9:192],zero_division=0)
-    fam_score = sklearn.metrics.jaccard_score(in_vec[276:3901],t_vec[276:3901],zero_division=0)
-    if in_vec[0] == t_vec[0]:
-      coop_score = 1
-    else:
-      coop_score = 0
-
-    #initial weighting treats all feature classes as equal - looking into updating this as a feedback mechanism
-    return np.mean([gt_score,cat_score,mech_score,fam_score,coop_score])
-
-  #function to actually return community neighbors
-  def n_neighbors(self,in_data):
-    #applies jaccard func to each row using vectors and maps to "full" df w/text
-    slim, vec, in_vec = in_data
-    vec['score']=vec.apply(lambda x: self.ret_jaccard(in_vec,x),raw=True,axis=1)
-    slim['score']=vec['score']
-
-    #converts to rank - this avoids splitting equal scoring groups inappropriately
-    slim['rank'] = slim['score'].rank(ascending=False)
-    return slim[slim['rank']<self.top_n].sort_values(by=['rank'])
   
 class model_control:
   def __init__(self, apikey):
@@ -169,9 +130,16 @@ class model_control:
     return answer['choices'][0]['text']
 
   def resp_cleanup(self,text):
-
+    
     if ((text[-1] != "!") & (text[-1] != ".") & (text[-1] != "?")):
       text = " ".join([e+'.' for e in text.split('.')[0:-1] if e])
 
+    sent = re.split(r'([.?!:])', text)
+    phrases = ["[Dd]esigned by","[Dd]esigner of","[Aa]rt by","[Aa]rtist of","[Pp]ublished"]
+
+    pat = re.compile("(?:" + "|".join(phrases) + ")")
+    fix = re.compile("(?<=[.!?])[.!?]")
     
+    text = re.sub(fix,'',''.join([s for s in sent if pat.search(s) == None]))
+
     return text
