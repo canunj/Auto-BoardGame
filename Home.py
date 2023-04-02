@@ -115,7 +115,7 @@ def application():
     ###Models
     @st.cache_resource
     def setup_models():
-        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
+        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(apikey=st.secrets.KEY,model=st.secrets.OAI_MODEL)
 
     Tgen, iman, mctrl = setup_models()
     

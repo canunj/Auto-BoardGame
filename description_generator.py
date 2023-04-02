@@ -6,8 +6,6 @@ def getpreferredencoding(do_setlocale = True):
 locale.getpreferredencoding = getpreferredencoding
 
 #make sure constants file is in path
-import Model_Constants as mc
-
 import pandas as pd
 import numpy as np
 import re
@@ -96,13 +94,13 @@ class input_manager:
     return ks
   
 class model_control:
-  def __init__(self, apikey):
+  def __init__(self, apikey,model):
     self.api_key = apikey
     openai.api_key = self.api_key
 
     self.prompt = None
     
-    self.model = openai.FineTune.retrieve(id=mc.SEND_MODEL()).fine_tuned_model
+    self.model = openai.FineTune.retrieve(id=model).fine_tuned_model
 
   def prompt_formatter(self,ks): 
     self.prompt = ". ".join(ks) + "\n\n###\n\n"
