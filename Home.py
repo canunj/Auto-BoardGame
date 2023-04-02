@@ -25,6 +25,8 @@ def application():
     from description_generator import input_manager, model_control
     import  Model_Constants as mc
 
+
+
     #non-ui helper functions
     def reader(url):
         url_file = io.BytesIO(urllib.request.urlopen(url).read())
@@ -85,21 +87,8 @@ def application():
                 st.session_state.title_iter-=1
         cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
         desc = re.sub(re.compile("__"),cur_title,st.session_state.output_dict[st.session_state.desc_iter]['text'])  
-        
-        r_desc =  ''
-        wl = 0
-        ll = 0
 
-        for word in desc.split(' '):
-            wl += len(word)
-            if ((wl/80)  - ll) > 1:
-                ll += 1
-                r_desc += word+'\n'
-            else:
-                r_desc +=  word+' '
-
-
-        return (cur_title, r_desc.lstrip())
+        return (cur_title, desc.lstrip())
 
     ###Variables
 
@@ -138,11 +127,19 @@ def application():
     if 'output_dict' not in st.session_state:
         st.session_state.output_dict = {}
     if 'inputs' not in st.session_state:
-        st.session_state.inputs= []
-    
-    
-    st.session_state.cur_pair = ("","Run me!")
-    
+        st.session_state.inputs = []
+    if 'cur_pair' not in st.session_state:
+        st.session_state.cur_pair = ("","Run me!")
+    if 'f_d' not in st.session_state:
+        st.session_state.f_d = None
+    if 'g_d' not in st.session_state:
+        st.session_state.g_d = None
+    if 'm_d' not in st.session_state:
+        st.session_state.m_d = None
+    if 'c_d' not in st.session_state:
+        st.session_state.c_d = None
+    if 'coop_d' not in st.session_state:
+        st.session_state.coop_d = 0
 
     Title_v = False
     Desc_v = False
@@ -152,8 +149,6 @@ def application():
         out = title_check(next=val)
         st.session_state.cur_pair = out
         print('runnin')
-
-
 
     #UI
 
@@ -178,102 +173,162 @@ def application():
             """
         )
     
-    st.sidebar.success("Select a demo below.")
-    with st.expander('Results', expanded=True):
-        t_col1, t_col2 = st.columns(2)
-        d_col1, d_col2 = st.columns(2)
+    results = st.empty()
+
+    with st.expander('Demos'):
+
+        st.write("""Below are some buttons to run Auto-BG on some real games you might have heard of.
+                 Press the button, and the corresponding attribute types will be placed into the drop-down fields below.
+                 Then press run to see what Auto-BG comes up with!""")
+
+        b1, b2, b3 =  st.columns(3)
+
+    with b1:
+        SoC = st.button('Settlers of Catan')
+        if SoC:
+            st.session_state.f_d = [
+                'Animals: Sheep',
+                'Components: Hexagonal Tiles',
+                'Components: Wooden pieces & boards'
+                ]
+            st.session_state.g_d = ['Family Game', 'Strategy Game']
+            st.session_state.m_d = [
+                'Hexagon Grid',
+                'Network and Route Building',
+                'Random Production',
+                'Trading',
+                'Variable Set-up'
+                ]
+            st.session_state.c_d = [
+                'Economic',
+                'Negotiation'
+                ]
+            st.session_state.coop_d = 0
+
+    with b2:
+        TtR = st.button('Ticket to Ride')
+        if TtR:
+            st.session_state.f_d = [
+                'Components: Map (Continental / National scale)',
+                'Continents: North America',
+                'Country: USA'
+                ]
+            st.session_state.g_d = ['Family Game']
+            st.session_state.m_d = [
+                'Contracts',
+                'End Game Bonuses',
+                'Network and Route Building',
+                'Push Your Luck',
+                'Set Collection'
+                ]
+            st.session_state.c_d = [
+                'Trains'
+                ]
+            st.session_state.coop_d = 0
         
-        if 'title_placeholder' in locals():
-            pass
-        else:
-            title_placeholder = st.container()
-            desc_placeholder = st.container()
-
-        with t_col1:
-            if st.button("See Previous Title"):
-                show_title(-1)
-
-        with t_col2:
-            if st.button("See Next Title"):
-                show_title(1)
-
-        with d_col1:
-            if st.button("See Previous Description"):
-                if st.session_state.desc_iter == 0:
-                    st.session_state.desc_iter = 2
-                    st.session_state.title_iter = -1
-                else:
-                    st.session_state.desc_iter -= 1
-                    st.session_state.title_iter = -1
-                show_title(1)
-
-        with d_col2:
-            if st.button("See Next Description"):
-                if st.session_state.desc_iter == 2:
-                    st.session_state.desc_iter = 0
-                    st.session_state.title_iter = -1
-                else:
-                    st.session_state.desc_iter += 1
-                    st.session_state.title_iter = -1
-                show_title(1)
-
-        title_placeholder.write(
-                """
-                #### Title:
-                """)
-        title_placeholder.write(st.session_state.cur_pair[0])
-
-        desc_placeholder.write(
-                """
-                ####  Description:
-                """)
-        desc_placeholder.write(st.session_state.cur_pair[1])
+    with b3:
+        P = st.button('Pandemic')
+        if P:
+            st.session_state.f_d = [
+                'Components: Map (Global Scale)',
+                'Components: Multi-Use Cards',
+                'Medical: Diseases',
+                'Region: The World',
+                'Theme: Science'
+                ]
+            st.session_state.g_d = ['Family Game', 'Strategy Game']
+            st.session_state.m_d = [
+                'Action Points',
+                'Cooperative Game',
+                'Point to Point Movement',
+                'Trading',
+                'Variable Player Powers'
+                ]
+            st.session_state.c_d = [
+                'Medical'
+                ]
+            st.session_state.coop_d = 1
 
     #Form
-    with st.form("Auto-BG"):
+    with st.expander("Auto-BG", expanded=True):
 
         col1, col2 = st.columns(2)
     
         with col1:
-            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4]), key='Family', max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
+            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4]), key='Family', default=st.session_state.f_d, max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
     
         with col2:
-            Game_v = st.multiselect("Game", options=pd.Series(category_keys[1]), key='Game', max_selections=2, help='Top level genres - Family, Strategy, etc.\n Maximum of two choices.')
+            Game_v = st.multiselect("Game", options=pd.Series(category_keys[1]), key='Game', default=st.session_state.g_d, max_selections=2, help='Top level genres - Family, Strategy, etc.\n Maximum of two choices.')
         
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', max_selections=3, help='The primary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The primary genres.\n Maximum of three choices.')
         
         with col4:
-            Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', max_selections=5, help='Game rules!\n Maximum of five choices.')
+            Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
 
-        Cooperative_v = st.checkbox('Cooperative?', value=coop, key='CoopCheck')
+        Cooperative_v = st.checkbox('Cooperative?', value=st.session_state.coop_d, key='CoopCheck')
 
-        run = st.form_submit_button("Run Model")
+        run = st.button("Run Model")
 
         if run:
             if st.session_state.inputs  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
-                st.write('Already  Ran')
+                st.write('Inputs did not change, results currently loaded.')
             else:
                 st.session_state.output_dict = {}
-                st.session_state.title_iter = -1
+                st.session_state.title_iter = 0
                 st.session_state.desc_iter = 0
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
                 builder(st.session_state.inputs)
                 st.session_state.cur_pair = title_check()
-                title_placeholder.write(
-                    """
-                    #### Title:
-                    """)
-                title_placeholder.write(st.session_state.cur_pair[0])
-                
 
-                desc_placeholder.write(
-                    """
-                    ####  Description:
-                    """)
-                desc_placeholder.write(st.session_state.cur_pair[1])
+    if st.session_state.output_dict == {}:
+        results.empty()
+    else:
+        with results.expander('Results', expanded=True):
+        
+            st.write(
+                """
+                #### Title:
+                """)
+            st.write(st.session_state.cur_pair[0])
+            t_col1, t_col2 = st.columns(2)
+            with t_col1:
+                if st.button("See Previous Title"):
+                    show_title(-1)
+
+            with t_col2:
+                if st.button("See Next Title"):
+                    show_title(1)
+            
+            st.write(
+                """
+                ####  Description:
+                """)
+            st.write(st.session_state.cur_pair[1])
+            d_col1, d_col2 = st.columns(2)
+            with d_col1:
+                if st.button("See Previous Description"):
+                    if st.session_state.desc_iter == 0:
+                        st.session_state.desc_iter = 2
+                        st.session_state.title_iter = -1
+                    else:
+                        st.session_state.desc_iter -= 1
+                        st.session_state.title_iter = -1
+                    show_title(1)
+
+            with d_col2:
+                if st.button("See Next Description"):
+                    if st.session_state.desc_iter == 2:
+                        st.session_state.desc_iter = 0
+                        st.session_state.title_iter = -1
+                    else:
+                        st.session_state.desc_iter += 1
+                        st.session_state.title_iter = -1
+                    show_title(1)
+
+
 
 def demo():
     st.text('This is demo, wow more changes')
