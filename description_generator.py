@@ -6,8 +6,6 @@ def getpreferredencoding(do_setlocale = True):
 locale.getpreferredencoding = getpreferredencoding
 
 #make sure constants file is in path
-import Model_Constants as mc
-
 import pandas as pd
 import numpy as np
 import re
@@ -31,7 +29,7 @@ import sklearn
 import openai
 from operator import itemgetter
 import re
-
+import Model_Constants as mc
 #user input manager class
 class input_manager:
   
