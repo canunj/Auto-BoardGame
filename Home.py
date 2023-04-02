@@ -76,13 +76,13 @@ def application():
 
     def title_check(next=1):
         if next==1:
-            if st.session_state.title_iter == len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1:
+            if st.session_state.title_iter == (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1):
                 st.session_state.title_iter = 0
             else:
                 st.session_state.title_iter+=1
         elif next==-1:
             if st.session_state.title_iter == 0:
-                st.session_state.title_iter = len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1
+                st.session_state.title_iter = (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1)
             else:
                 st.session_state.title_iter-=1
         cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
@@ -148,7 +148,6 @@ def application():
     def show_title(val): 
         out = title_check(next=val)
         st.session_state.cur_pair = out
-        print('runnin')
 
     #UI
 
@@ -159,17 +158,14 @@ def application():
         st.write(
             """
             Discover the concept for your next favorite game!
-            
-            Take your ideas and turn them into a full-fledged tabletop game concept through the power of deep learning!
-            
+                        
             How do you use Auto-BG?
             Pick any set of choices from four selectors below: Family, Game, Mechanic, and Category.
-            Then, if you are looking to lose together, activate the toggle for a cooperative game!
+            If you are looking to lose together - activate the cooperative toggle.
             
-            Need more detail utilize the ? icons for more information.
+            See ? icons for detailed information.
             
-            Need a guided walkthrough or want to see how Auto-BG performs on a known game?
-            Open the menu in the top left corner!
+            Want to see how Auto-BG performs on a known game? Select any of the three pre-configured demos below!
             """
         )
     
@@ -277,7 +273,7 @@ def application():
                 st.write('Inputs did not change, results currently loaded.')
             else:
                 st.session_state.output_dict = {}
-                st.session_state.title_iter = 0
+                st.session_state.title_iter = -1
                 st.session_state.desc_iter = 0
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
                 builder(st.session_state.inputs)
@@ -288,11 +284,7 @@ def application():
     else:
         with results.expander('Results', expanded=True):
         
-            st.write(
-                """
-                #### Title:
-                """)
-            st.write(st.session_state.cur_pair[0])
+            
             t_col1, t_col2 = st.columns(2)
             with t_col1:
                 if st.button("See Previous Title"):
@@ -302,11 +294,7 @@ def application():
                 if st.button("See Next Title"):
                     show_title(1)
             
-            st.write(
-                """
-                ####  Description:
-                """)
-            st.write(st.session_state.cur_pair[1])
+            
             d_col1, d_col2 = st.columns(2)
             with d_col1:
                 if st.button("See Previous Description"):
@@ -328,6 +316,18 @@ def application():
                         st.session_state.title_iter = -1
                     show_title(1)
 
+            st.write(
+                """
+                #### Title:
+                """)
+            st.write(st.session_state.cur_pair[0])
+
+            st.write(
+                """
+                ####  Description:
+                """)
+            st.write(st.session_state.cur_pair[1])
+
 
 
 def demo():
@@ -338,6 +338,6 @@ page_names_to_funcs = {
     "Demo": demo
 }
 
-demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
+demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
 page_names_to_funcs[demo_name]()
 
