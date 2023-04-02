@@ -152,7 +152,7 @@ def application():
     #UI
 
     #Intro
-    st.title("""Auto-BG: The Game Concept Generator!""")
+    st.title("""Auto-BG: The Game Concept Generator""")
 
     with st.expander("How to use", expanded=True):
         st.write(
@@ -235,7 +235,6 @@ def application():
             st.session_state.g_d = ['Family Game', 'Strategy Game']
             st.session_state.m_d = [
                 'Action Points',
-                'Cooperative Game',
                 'Point to Point Movement',
                 'Trading',
                 'Variable Player Powers'
@@ -251,7 +250,7 @@ def application():
         col1, col2 = st.columns(2)
     
         with col1:
-            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4]), key='Family', default=st.session_state.f_d, max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
+            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4][8:]), key='Family', default=st.session_state.f_d, max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
     
         with col2:
             Game_v = st.multiselect("Game", options=pd.Series(category_keys[1]), key='Game', default=st.session_state.g_d, max_selections=2, help='Top level genres - Family, Strategy, etc.\n Maximum of two choices.')
@@ -262,7 +261,7 @@ def application():
             Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The primary genres.\n Maximum of three choices.')
         
         with col4:
-            Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
+            Mechanics_v = st.multiselect("Mechanics", options=pd.Series([x for x in category_keys[2] if x != "Cooperative Game"]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
 
         Cooperative_v = st.checkbox('Cooperative?', value=st.session_state.coop_d, key='CoopCheck')
 
@@ -275,6 +274,10 @@ def application():
                 st.session_state.output_dict = {}
                 st.session_state.title_iter = -1
                 st.session_state.desc_iter = 0
+
+                if Cooperative_v == True:
+                    Mechanics_v.append('Cooperative Game')
+
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
                 builder(st.session_state.inputs)
                 st.session_state.cur_pair = title_check()
