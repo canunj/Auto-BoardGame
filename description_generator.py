@@ -1,11 +1,3 @@
-#check install dependencies - locale fix sourced from Stephen Ng'etich on SO
-#this is a Colab only fix and we can strip it from the final version
-import locale
-def getpreferredencoding(do_setlocale = True):
-    return "UTF-8"
-locale.getpreferredencoding = getpreferredencoding
-
-#make sure constants file is in path
 import pandas as pd
 import numpy as np
 import re
