@@ -28,6 +28,7 @@ def application():
 
 
     #non-ui helper functions
+    #reader code extended from https://gist.github.com/thearn/5424244 for alternate load format
     def reader(url):
         url_file = io.BytesIO(urllib.request.urlopen(url).read())
         f = gzip.GzipFile(fileobj=url_file)
@@ -104,8 +105,7 @@ def application():
         return slim_df, search_tokens, vector_df, category_keys, coop
     
     slim_df, search_tokens, vector_df, category_keys, coop = fetch_data()
-
-    #Is this needed????
+    
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
             "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
