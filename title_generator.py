@@ -69,7 +69,7 @@ class Title_Generator:
         for result in beam_outputs:
             res = self.tokenizer.decode(result).replace('<pad> ','').replace('</s>','').replace('<pad>','')
             candidates.append(res)
-
+        
         return candidates, description
     
     def candidate_score(self,candidates,ex_check=None):
@@ -91,7 +91,6 @@ class Title_Generator:
             candidates = self.candidate_generator(gen_desc)
             next = [cand for cand in candidates[0]+hold if not reg.match(cand)]
             candidates = (next, desc)
-
         
         #backup load function, will refactor
         nlp=spacy.load("en_core_web_md")
@@ -105,9 +104,10 @@ class Title_Generator:
         clean_cand_step = list(set([game[0] for game in list(zip(candidates[0],[len(self.game_df[self.game_df.name.isin([x])]) for x in candidates[0]])) if game[1]==0]))
         clean_cand_step = transform(clean_cand_step)
 
-        clean_cand_step = [re.sub(re.compile("(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)"),"",
+        clean_cand_step = [re.sub(re.compile("(?<=[ ])And(?=[ ])"),'and',
+                                  re.sub(re.compile("(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)"),"",
                                   re.sub(re.compile("(?<=[a-z])'S"),"'s",
-                                  re.sub(re.compile("(?<=[ ])Of(?=[ ])"),"of",x))) 
+                                  re.sub(re.compile("(?<=[ ])Of(?=[ ])"),"of",x)))) 
                                   for x in clean_cand_step]
 
         
@@ -133,14 +133,22 @@ class Title_Generator:
 
         scores = [x if x !=0 else random.uniform(.3, .7) for x in [tok.similarity(doc) for tok in sim]]
         
-        out_titles = sorted(list(zip(clean_cand,scores)),key=itemgetter(1))
+        out_titles = sorted(list(zip(clean_cand,scores)),key=itemgetter(1),reverse=True)
         
         pat = re.compile("(?<=[!.?])(?=[^\s])")
         pat2 = re.compile("([Ff]rom the [Pp]ublisher[: ]|[Ff]rom the [Dd]esigner[: ]|[Gg]ame [Dd]escription)")
         pat3 = re.compile(": [Tt]he [Gg]ame: [Tt]he [Gg]ame|: [Tt]he [Gg]ame")
+        pat4 = re.compile("[Tt]he [Th]he")
+        pat5 = re.compile("[Gg]ame [Gg]ame")
+        pat6 = re.compile("[Tt]he [Gg]ame [Oo]f [Tt]he [Gg]ame [Oo]f")
         
         desc = re.sub(pat," ",candidates[1])   
         desc = re.sub(pat2,"",desc)
         desc = re.sub(pat3,"",desc)
+        desc = re.sub(pat4,"The",desc)
+        desc = re.sub(pat5,"Game",desc)
+        desc = re.sub(pat6,"The Game of",desc)
         
+        print((desc,out_titles))
+
         return {'text':desc,'titles':out_titles}

@@ -85,6 +85,8 @@ class input_manager:
     d = self.key.copy()
     for cat in k_flags:
       d[cat] = 1.0
+    
+    # DELETE ME
     return d
 
   def input_parser(self,in_vec):
@@ -104,7 +106,9 @@ class model_control:
 
   def prompt_formatter(self,ks): 
     self.prompt = ". ".join(ks) + "\n\n###\n\n"
-
+    
+  
+  
   def call_api(self,status=0):
     if status == 0:
       temp=0.5
@@ -129,6 +133,7 @@ class model_control:
 
   def resp_cleanup(self,text):
 
+
     if ((text[-1] != "!") & (text[-1] != ".") & (text[-1] != "?")):
       text = " ".join([e+'.' for e in text.split('.')[0:-1] if e])
 
@@ -139,5 +144,6 @@ class model_control:
     fix = re.compile("(?<=[.!?])[.!?]")
 
     text = re.sub(fix,'',''.join([s for s in sent if pat.search(s) == None]))
-    
+
+
     return text
