@@ -10,14 +10,13 @@ from torch import nn
 import torch.nn.functional as F
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 
+#Custom text tokenizer from https://github.com/canunj/deconstructing_games by N Canu & K Chen
 def doc_text_preprocessing(ser):
     nlp=spacy.load("en_core_web_sm", exclude=['parser','ner','textcat'])
 
     """text processing steps"""
     import re
     stop_words=set(stopwords.words('english'))
-    #stop_words.update(['game','player','players','games', 'also', 
-    #                   'description','publisher'])
         
     single_letter_replace=lambda c: re.sub("\s+\w{1}\s+|\n|-|—",'',c)
     to_lower_func=lambda c: c.lower()
@@ -149,6 +148,4 @@ class Title_Generator:
         desc = re.sub(pat5,"Game",desc)
         desc = re.sub(pat6,"The Game of",desc)
         
-        print((desc,out_titles))
-
         return {'text':desc,'titles':out_titles}
