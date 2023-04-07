@@ -25,7 +25,27 @@ def application():
     from description_generator import input_manager, model_control
     import  Model_Constants as mc
 
-
+    #UI Session Variables
+    if 'desc_iter' not in st.session_state:
+        st.session_state.desc_iter = 0
+    if 'title_iter' not in st.session_state:
+        st.session_state.title_iter = 0
+    if 'output_dict' not in st.session_state:
+        st.session_state.output_dict = {}
+    if 'inputs' not in st.session_state:
+        st.session_state.inputs = []
+    if 'cur_pair' not in st.session_state:
+        st.session_state.cur_pair = ("","Run me!")
+    if 'f_d' not in st.session_state:
+        st.session_state.f_d = None
+    if 'g_d' not in st.session_state:
+        st.session_state.g_d = None
+    if 'm_d' not in st.session_state:
+        st.session_state.m_d = None
+    if 'c_d' not in st.session_state:
+        st.session_state.c_d = None
+    if 'coop_d' not in st.session_state:
+        st.session_state.coop_d = 0
 
     #non-ui helper functions
     def reader(url):
@@ -74,22 +94,56 @@ def application():
         st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
 
 
-    def title_check(next=1):
+
+    def title_check(next=-1):
         if next==1:
             if st.session_state.title_iter == (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1):
                 st.session_state.title_iter = 0
             else:
-                st.session_state.title_iter+=1
+                st.session_state.title_iter +=1
         elif next==-1:
             if st.session_state.title_iter == 0:
                 st.session_state.title_iter = (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1)
             else:
-                st.session_state.title_iter-=1
+                st.session_state.title_iter -=1
+        else:
+            st.session_state.title_iter = 0
+
         cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
         desc = re.sub(re.compile("__"),cur_title,st.session_state.output_dict[st.session_state.desc_iter]['text'])  
 
         return (cur_title, desc.lstrip())
 
+    def show_title(val): 
+        out = title_check(next=val)
+        st.session_state.cur_pair = out
+
+    def PT_button_clicked():
+        show_title(-1)
+
+    def NT_button_clicked():
+        show_title(1)
+
+    def PD_button_clicked():
+        if st.session_state.desc_iter == 0:
+            st.session_state.desc_iter = 2
+            st.session_state.title_iter = 0
+        else:
+            st.session_state.desc_iter -= 1
+            st.session_state.title_iter = 0
+        show_title(0)
+
+    def ND_button_clicked():
+        if st.session_state.desc_iter == 2:
+                st.session_state.desc_iter = 0
+                st.session_state.title_iter = 0
+        else:
+            st.session_state.desc_iter += 1
+            st.session_state.title_iter = 0
+        show_title(0)
+
+
+        
     ###Variables
 
     ###Data
@@ -119,35 +173,7 @@ def application():
 
     Tgen, iman, mctrl = setup_models()
     
-    #UI Variables
-    if 'desc_iter' not in st.session_state:
-        st.session_state.desc_iter = 0
-    if 'title_iter' not in st.session_state:
-        st.session_state.title_iter = -1
-    if 'output_dict' not in st.session_state:
-        st.session_state.output_dict = {}
-    if 'inputs' not in st.session_state:
-        st.session_state.inputs = []
-    if 'cur_pair' not in st.session_state:
-        st.session_state.cur_pair = ("","Run me!")
-    if 'f_d' not in st.session_state:
-        st.session_state.f_d = None
-    if 'g_d' not in st.session_state:
-        st.session_state.g_d = None
-    if 'm_d' not in st.session_state:
-        st.session_state.m_d = None
-    if 'c_d' not in st.session_state:
-        st.session_state.c_d = None
-    if 'coop_d' not in st.session_state:
-        st.session_state.coop_d = 0
 
-    Title_v = False
-    Desc_v = False
-
-    ###ui helper functions
-    def show_title(val): 
-        out = title_check(next=val)
-        st.session_state.cur_pair = out
 
     #UI
 
@@ -180,7 +206,7 @@ def application():
         b1, b2, b3 =  st.columns(3)
 
     with b1:
-        SoC = st.button('Settlers of Catan')
+        SoC = st.button('Settlers of Catan', use_container_width=True)
         if SoC:
             st.session_state.f_d = [
                 'Animals: Sheep',
@@ -202,7 +228,7 @@ def application():
             st.session_state.coop_d = 0
 
     with b2:
-        TtR = st.button('Ticket to Ride')
+        TtR = st.button('Ticket to Ride', use_container_width=True)
         if TtR:
             st.session_state.f_d = [
                 'Components: Map (Continental / National scale)',
@@ -223,7 +249,7 @@ def application():
             st.session_state.coop_d = 0
         
     with b3:
-        P = st.button('Pandemic')
+        P = st.button('Pandemic', use_container_width=True)
         if P:
             st.session_state.f_d = [
                 'Components: Map (Global Scale)',
@@ -259,22 +285,27 @@ def application():
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The primary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The stmary genres.\n Maximum of three choices.')
         
         with col4:
             Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
 
         Cooperative_v = st.checkbox('Cooperative?', value=st.session_state.coop_d, key='CoopCheck')
-
-        run = st.button("Run Model")
+        
+        run = st.button("Run Model", use_container_width=True)
 
         if run:
             if st.session_state.inputs  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
                 st.write('Inputs did not change, results currently loaded.')
             else:
-                st.session_state.output_dict = {}
-                st.session_state.title_iter = -1
+                
                 st.session_state.desc_iter = 0
+                st.session_state.title_iter = 0
+                st.session_state.output_dict = {}
+
+                if Cooperative_v == True:
+                    Mechanics_v.append('Cooperative Game')
+
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
                 builder(st.session_state.inputs)
                 st.session_state.cur_pair = title_check()
@@ -283,52 +314,37 @@ def application():
         results.empty()
     else:
         with results.expander('Results', expanded=True):
-        
-            
-            t_col1, t_col2 = st.columns(2)
-            with t_col1:
-                if st.button("See Previous Title"):
-                    show_title(-1)
-
-            with t_col2:
-                if st.button("See Next Title"):
-                    show_title(1)
-            
-            
-            d_col1, d_col2 = st.columns(2)
-            with d_col1:
-                if st.button("See Previous Description"):
-                    if st.session_state.desc_iter == 0:
-                        st.session_state.desc_iter = 2
-                        st.session_state.title_iter = -1
-                    else:
-                        st.session_state.desc_iter -= 1
-                        st.session_state.title_iter = -1
-                    show_title(1)
-
-            with d_col2:
-                if st.button("See Next Description"):
-                    if st.session_state.desc_iter == 2:
-                        st.session_state.desc_iter = 0
-                        st.session_state.title_iter = -1
-                    else:
-                        st.session_state.desc_iter += 1
-                        st.session_state.title_iter = -1
-                    show_title(1)
 
             st.write(
                 """
                 #### Title:
                 """)
+            
+            
+            
             st.write(st.session_state.cur_pair[0])
+
+
+            t_col1, t_col2 = st.columns(2)
+            with t_col1:
+                st.button("See Previous Title", on_click=PT_button_clicked, use_container_width=True)
+
+            with t_col2:
+                st.button("See Next Title", on_click=NT_button_clicked, use_container_width=True)
 
             st.write(
                 """
                 ####  Description:
                 """)
-            st.write(st.session_state.cur_pair[1])
+            st.write(st.session_state.cur_pair[1].replace('$','\$'))
+            
+            d_col1, d_col2 = st.columns(2)
+            with d_col1:
+                st.button("See Previous Description", on_click=PD_button_clicked, use_container_width=True)
 
-
+            with d_col2:
+                st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
+                    
 
 def demo():
     st.text('This is demo, wow more changes')
