@@ -285,7 +285,7 @@ def application():
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The primary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The stmary genres.\n Maximum of three choices.')
         
         with col4:
             Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
@@ -300,15 +300,12 @@ def application():
             else:
                 
                 st.session_state.desc_iter = 0
-<<<<<<< Updated upstream
-=======
                 st.session_state.title_iter = 0
                 st.session_state.output_dict = {}
 
                 if Cooperative_v == True:
                     Mechanics_v.append('Cooperative Game')
 
->>>>>>> Stashed changes
                 st.session_state.inputs  = revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v)
                 builder(st.session_state.inputs)
                 st.session_state.cur_pair = title_check()
@@ -317,8 +314,6 @@ def application():
         results.empty()
     else:
         with results.expander('Results', expanded=True):
-        
-            st.write(st.session_state.desc_iter, st.session_state.title_iter)
 
             st.write(
                 """
