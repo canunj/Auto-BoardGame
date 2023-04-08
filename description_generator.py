@@ -125,7 +125,6 @@ class model_control:
 
   def resp_cleanup(self,text):
 
-
     if ((text[-1] != "!") & (text[-1] != ".") & (text[-1] != "?")):
       text = " ".join([e+'.' for e in text.split('.')[0:-1] if e])
 

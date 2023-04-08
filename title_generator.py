@@ -99,7 +99,8 @@ class Title_Generator:
         def transform(L):
             S = set(L)
             return [item.title() for item in L if item.lower() not in S and not S.add(item.lower())]
-        
+
+
         clean_cand_step = list(set([game[0] for game in list(zip(candidates[0],[len(self.game_df[self.game_df.name.isin([x])]) for x in candidates[0]])) if game[1]==0]))
         clean_cand_step = transform(clean_cand_step)
 
@@ -120,7 +121,7 @@ class Title_Generator:
                     clean_cand.append(cand)
             except:
                 clean_cand.append(cand)
-        
+
         #text processing
         token_cand = doc_text_preprocessing(pd.Series(clean_cand))
         token_art = doc_text_preprocessing(pd.Series([candidates[1]]))
@@ -133,19 +134,19 @@ class Title_Generator:
         scores = [x if x !=0 else random.uniform(.3, .7) for x in [tok.similarity(doc) for tok in sim]]
         
         out_titles = sorted(list(zip(clean_cand,scores)),key=itemgetter(1),reverse=True)
-        
+   
         pat = re.compile("(?<=[!.?])(?=[^\s])")
         pat2 = re.compile("([Ff]rom the [Pp]ublisher[: ]|[Ff]rom the [Dd]esigner[: ]|[Gg]ame [Dd]escription)")
         pat3 = re.compile(": [Tt]he [Gg]ame: [Tt]he [Gg]ame|: [Tt]he [Gg]ame")
-        pat4 = re.compile("[Tt]he [Th]he")
-        pat5 = re.compile("[Gg]ame [Gg]ame")
-        pat6 = re.compile("[Tt]he [Gg]ame [Oo]f [Tt]he [Gg]ame [Oo]f")
+        pat4 = re.compile("[Tt]he __")
+        pat5 = re.compile("__ [Gg]ame")
+        pat6 = re.compile("[Tt]he [Gg]ame [Oo]f __")
         
         desc = re.sub(pat," ",candidates[1])   
         desc = re.sub(pat2,"",desc)
         desc = re.sub(pat3,"",desc)
-        desc = re.sub(pat4,"The",desc)
-        desc = re.sub(pat5,"Game",desc)
-        desc = re.sub(pat6,"The Game of",desc)
-        
+        desc = re.sub(pat4,"__",desc)
+        desc = re.sub(pat5,"__",desc)
+        desc = re.sub(pat6,"__",desc)
+
         return {'text':desc,'titles':out_titles}

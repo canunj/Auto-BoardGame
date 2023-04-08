@@ -96,7 +96,7 @@ def application():
 
 
 
-    def title_check(next=-1):
+    def title_check(next=0):
         if next==1:
             if st.session_state.title_iter == (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1):
                 st.session_state.title_iter = 0
@@ -150,10 +150,10 @@ def application():
     ###Data
     @st.cache_resource
     def fetch_data():
-        slim_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
-        search_tokens = token_expand("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/token_search.gz?raw=true")
-        vector_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
-        category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
+        slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
+        search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/token_search.gz?raw=true")
+        vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
+        category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
         coop = [1,0]
         st.sidebar.success("Fetched Data!")
         return slim_df, search_tokens, vector_df, category_keys, coop
@@ -164,7 +164,7 @@ def application():
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
             "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
             "[Aa]ge [Oo]f [Ee]mpires [Ii][Ii]: [Tt]he [Aa]ge [Oo]f [Kk]ings","[Aa]ge [Oo]f [Ee]mpires 2: [Tt]he [Aa]ge [Oo]f [Kk]ings",
-            "[Aa]ge [Oo]f [Ee]mpires"] 
+            "[Aa]ge [Oo]f [Ee]mpires","Doctor Who"] 
 
     ###Models
     @st.cache_resource
