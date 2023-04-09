@@ -105,7 +105,7 @@ class Title_Generator:
         clean_cand_step = transform(clean_cand_step)
 
         clean_cand_step = [re.sub(re.compile("(?<=[ ])And(?=[ ])"),'and',
-                                  re.sub(re.compile("(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)"),"",
+                                  re.sub(re.compile('(?<=\S) (([(]|\b)[Ss]econd [Ee]dition([)]|\b)|[Ss]econd [Ee]dition|2[Nn][Dd] [Ee]dition|([(]|\b)[Tt]hird [Ee]dition([)]|\b)|3[Rr][Dd] [Ee]dition)|["]Second Edition["]'),"",
                                   re.sub(re.compile("(?<=[a-z])'S"),"'s",
                                   re.sub(re.compile("(?<=[ ])Of(?=[ ])"),"of",x)))) 
                                   for x in clean_cand_step]

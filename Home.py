@@ -206,7 +206,7 @@ def application():
         b1, b2, b3 =  st.columns(3)
 
     with b1:
-        SoC = st.button('Settlers of Catan', use_container_width=True)
+        SoC = st.button('Catan', use_container_width=True)
         if SoC:
             st.session_state.f_d = [
                 'Animals: Sheep',
