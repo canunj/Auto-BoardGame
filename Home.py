@@ -284,7 +284,7 @@ def application():
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The stmary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='Expanded genre tags.\n Maximum of three choices.')
         
         with col4:
             Mechanics_v = st.multiselect("Mechanics", options=pd.Series([x for x in category_keys[2] if x != "Cooperative Game"]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
@@ -345,12 +345,9 @@ def application():
                 st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
                     
 
-def demo():
-    st.text('This is demo, wow more changes')
 
 page_names_to_funcs = {
-    "Application": application,
-    "Demo": demo
+    "Application": application
 }
 
 demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
