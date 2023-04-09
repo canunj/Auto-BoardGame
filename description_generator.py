@@ -1,26 +1,9 @@
-import pandas as pd
+
 import numpy as np
 import re
-import nltk
-from nltk.corpus import stopwords
-nltk.download('stopwords')
-import gensim
-from gensim.test.utils import get_tmpfile
-from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
-import spacy, en_core_web_sm
-from spacy.tokens import DocBin
-import torch
-from torch import nn
-import torch.nn.functional as F
-from transformers import T5ForConditionalGeneration,T5Tokenizer
-import urllib.request
-import pickle
-import gzip
-import io
-import sklearn
+import spacy
 import openai
 from operator import itemgetter
-import re
 import Model_Constants as mc
 #user input manager class
 class input_manager:
@@ -35,8 +18,6 @@ class input_manager:
 
   #translate input text to vector
   def set_input(self,input_cats):
-    from operator import itemgetter
-    import re
     #need setup to apply correct group tag to values
     nlp=spacy.load("en_core_web_md")
     #separate known/unknown features

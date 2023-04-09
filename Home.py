@@ -4,24 +4,16 @@ st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wid
 
 def application():
     ###Imports
-    import streamlit as st
     import pandas as pd
     import numpy as np
     import re
-    import nltk
     import urllib
     import pickle
-    from nltk.corpus import stopwords
-    from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
-    import spacy, en_core_web_sm
-    import torch
-    from torch import nn
-    import torch.nn.functional as F
-    from transformers import T5ForConditionalGeneration,T5Tokenizer
+    import spacy
+    from spacy.tokens import DocBin
     from title_generator import Title_Generator
     import gzip
     import io
-    from spacy.tokens import DocBin
     from description_generator import input_manager, model_control
     import  Model_Constants as mc
 
@@ -186,12 +178,13 @@ def application():
             Discover the concept for your next favorite game!
                         
             How do you use Auto-BG?
-            Pick any set of choices from four selectors below: Family, Game, Mechanic, and Category.
+
+            Pick any set of tags from four selectors below: Family, Game, Mechanic, and Category.
             If you are looking to lose together - activate the cooperative toggle.
             
-            See ? icons for detailed information.
+            See ? icons for detailed information on each type of tag.
             
-            Want to see how Auto-BG performs on a known game? Select any of the three pre-configured demos below!
+            Select any pre-configured demo below to see how Auto-BG works on the tag set for a popular board game. 
             """
         )
     
@@ -199,9 +192,10 @@ def application():
 
     with st.expander('Demos'):
 
-        st.write("""Below are some buttons to run Auto-BG on some real games you might have heard of.
-                 Press the button, and the corresponding attribute types will be placed into the drop-down fields below.
-                 Then press run to see what Auto-BG comes up with!""")
+        st.write("""These buttons run Auto-BG on the tag set for real games you might be familiar with,
+                 choose a button and the corresponding tags automatically fill the selectors below.
+                 Press run and see how Auto-BG creates an alternate concept for these hit titles!
+                 """)
 
         b1, b2, b3 =  st.columns(3)
 

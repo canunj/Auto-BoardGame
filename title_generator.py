@@ -1,13 +1,9 @@
 import pandas as pd
-import numpy as np
 import re
-import nltk
 from nltk.corpus import stopwords
 from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
-import spacy, en_core_web_sm
+import spacy
 import torch
-from torch import nn
-import torch.nn.functional as F
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 
 #Custom text tokenizer from https://github.com/canunj/deconstructing_games by N Canu & K Chen
@@ -88,7 +84,7 @@ class Title_Generator:
             hold = candidates[0]
             gen_desc = re.sub(re.compile(re.escape("__")),"",desc)
             candidates = self.candidate_generator(gen_desc)
-            next = [cand for cand in candidates[0]+hold if not reg.match(cand)]
+            next = [cand for cand in candidates[0]+hold if not reg.search(cand)]
             candidates = (next, desc)
         
         #backup load function, will refactor
