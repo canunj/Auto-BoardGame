@@ -140,17 +140,16 @@ def application():
     ###Variables
 
     ###Data
-    @st.cache_resource
+    @st.cache_data
     def fetch_data():
         slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
         search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/token_search.gz?raw=true")
         vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
         category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
-        coop = [1,0]
         st.sidebar.success("Fetched Data!")
-        return slim_df, search_tokens, vector_df, category_keys, coop
+        return slim_df, search_tokens, vector_df, category_keys
     
-    slim_df, search_tokens, vector_df, category_keys, coop = fetch_data()
+    slim_df, search_tokens, vector_df, category_keys = fetch_data()
     
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
@@ -161,6 +160,7 @@ def application():
     ###Models
     @st.cache_resource
     def setup_models():
+        spacy.cli.download("en_core_web_md")
         return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
 
     Tgen, iman, mctrl = setup_models()
@@ -339,9 +339,59 @@ def application():
                 st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
                     
 
+def blog():
+    """
+    Blog describing the Auto-BG project
+    """
+    with open("BGG Blog MD.md", 'r') as blog_md:
+        blog_text = blog_md.read() 
+    st.markdown(blog_text)
+    st.sidebar.subheader('Auto-BG: The Board Game Concept Generator')
+    st.sidebar.write("*This application attempts to augment one step, early in that journey, when the seeds of an idea combine and sprout into a holistic concept.\
+                      By interpreting disparate mechanical and descriptive tags to identify a game concept, Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
+                      These descriptions support designers-to-be as alternatives to current concepts, seeds for future concepts, or any user as, hopefully, an entertaining thought experiment.*")
+
+def about_us():
+    """
+    About us page describing creators of Auto-BG
+    """
+    st.title("About Us")
+    st.sidebar.subheader('Creators of Auto-BG')
+    st.sidebar.write('*With a shared love of data science and board games, we came together and created Auto-BG as part of our Capstone project\
+                     for our "Master of Applied Data Science" program at the University of Michigan.\
+                     We hope you enjoy!*')
+
+    # Columns containing information on each of the creators
+    col1, col2, col3 = st.columns([1,1,1])
+
+    with col1:
+        st.image('./NC.jfif', use_column_width=True)
+        st.subheader('Nick Canu')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
+    
+    with col2:
+        st.image('./TD.jfif', use_column_width=True)
+        st.subheader('Taylor Druhot')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
+
+    with col3:
+        st.image('./SC.jfif', use_column_width=True)
+        st.subheader('Sebastian Capp')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
 
 page_names_to_funcs = {
-    "Application": application
+    "Application": application,
+    "Blog": blog,
+    "About Us": about_us, 
 }
 
 demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
