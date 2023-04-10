@@ -4,28 +4,40 @@ st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wid
 
 def application():
     ###Imports
-    import streamlit as st
     import pandas as pd
     import numpy as np
     import re
-    import nltk
     import urllib
     import pickle
-    from nltk.corpus import stopwords
-    from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
-    import spacy, en_core_web_sm
-    import torch
-    from torch import nn
-    import torch.nn.functional as F
-    from transformers import T5ForConditionalGeneration,T5Tokenizer
+    import spacy
+    from spacy.tokens import DocBin
     from title_generator import Title_Generator
     import gzip
     import io
-    from spacy.tokens import DocBin
     from description_generator import input_manager, model_control
     import  Model_Constants as mc
 
-
+    #UI Session Variables
+    if 'desc_iter' not in st.session_state:
+        st.session_state.desc_iter = 0
+    if 'title_iter' not in st.session_state:
+        st.session_state.title_iter = 0
+    if 'output_dict' not in st.session_state:
+        st.session_state.output_dict = {}
+    if 'inputs' not in st.session_state:
+        st.session_state.inputs = []
+    if 'cur_pair' not in st.session_state:
+        st.session_state.cur_pair = ("","Run me!")
+    if 'f_d' not in st.session_state:
+        st.session_state.f_d = None
+    if 'g_d' not in st.session_state:
+        st.session_state.g_d = None
+    if 'm_d' not in st.session_state:
+        st.session_state.m_d = None
+    if 'c_d' not in st.session_state:
+        st.session_state.c_d = None
+    if 'coop_d' not in st.session_state:
+        st.session_state.coop_d = 0
 
     #non-ui helper functions
     #reader code extended from https://gist.github.com/thearn/5424244 for alternate load format
@@ -75,31 +87,65 @@ def application():
         st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
 
 
-    def title_check(next=1):
+
+    def title_check(next=0):
         if next==1:
             if st.session_state.title_iter == (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1):
                 st.session_state.title_iter = 0
             else:
-                st.session_state.title_iter+=1
+                st.session_state.title_iter +=1
         elif next==-1:
             if st.session_state.title_iter == 0:
                 st.session_state.title_iter = (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1)
             else:
-                st.session_state.title_iter-=1
+                st.session_state.title_iter -=1
+        else:
+            st.session_state.title_iter = 0
+
         cur_title = st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0]
         desc = re.sub(re.compile("__"),cur_title,st.session_state.output_dict[st.session_state.desc_iter]['text'])  
 
         return (cur_title, desc.lstrip())
 
+    def show_title(val): 
+        out = title_check(next=val)
+        st.session_state.cur_pair = out
+
+    def PT_button_clicked():
+        show_title(-1)
+
+    def NT_button_clicked():
+        show_title(1)
+
+    def PD_button_clicked():
+        if st.session_state.desc_iter == 0:
+            st.session_state.desc_iter = 2
+            st.session_state.title_iter = 0
+        else:
+            st.session_state.desc_iter -= 1
+            st.session_state.title_iter = 0
+        show_title(0)
+
+    def ND_button_clicked():
+        if st.session_state.desc_iter == 2:
+                st.session_state.desc_iter = 0
+                st.session_state.title_iter = 0
+        else:
+            st.session_state.desc_iter += 1
+            st.session_state.title_iter = 0
+        show_title(0)
+
+
+        
     ###Variables
 
     ###Data
     @st.cache_resource
     def fetch_data():
-        slim_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
-        search_tokens = token_expand("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/token_search.gz?raw=true")
-        vector_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
-        category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
+        slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
+        search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/token_search.gz?raw=true")
+        vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
+        category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
         coop = [1,0]
         st.sidebar.success("Fetched Data!")
         return slim_df, search_tokens, vector_df, category_keys, coop
@@ -110,7 +156,7 @@ def application():
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
             "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
             "[Aa]ge [Oo]f [Ee]mpires [Ii][Ii]: [Tt]he [Aa]ge [Oo]f [Kk]ings","[Aa]ge [Oo]f [Ee]mpires 2: [Tt]he [Aa]ge [Oo]f [Kk]ings",
-            "[Aa]ge [Oo]f [Ee]mpires"] 
+            "[Aa]ge [Oo]f [Ee]mpires","Doctor Who"] 
 
     ###Models
     @st.cache_resource
@@ -119,35 +165,7 @@ def application():
 
     Tgen, iman, mctrl = setup_models()
     
-    #UI Variables
-    if 'desc_iter' not in st.session_state:
-        st.session_state.desc_iter = 0
-    if 'title_iter' not in st.session_state:
-        st.session_state.title_iter = -1
-    if 'output_dict' not in st.session_state:
-        st.session_state.output_dict = {}
-    if 'inputs' not in st.session_state:
-        st.session_state.inputs = []
-    if 'cur_pair' not in st.session_state:
-        st.session_state.cur_pair = ("","Run me!")
-    if 'f_d' not in st.session_state:
-        st.session_state.f_d = None
-    if 'g_d' not in st.session_state:
-        st.session_state.g_d = None
-    if 'm_d' not in st.session_state:
-        st.session_state.m_d = None
-    if 'c_d' not in st.session_state:
-        st.session_state.c_d = None
-    if 'coop_d' not in st.session_state:
-        st.session_state.coop_d = 0
 
-    Title_v = False
-    Desc_v = False
-
-    ###ui helper functions
-    def show_title(val): 
-        out = title_check(next=val)
-        st.session_state.cur_pair = out
 
     #UI
 
@@ -160,12 +178,13 @@ def application():
             Discover the concept for your next favorite game!
                         
             How do you use Auto-BG?
-            Pick any set of choices from four selectors below: Family, Game, Mechanic, and Category.
+
+            Pick any set of tags from four selectors below: Family, Game, Mechanic, and Category.
             If you are looking to lose together - activate the cooperative toggle.
             
-            See ? icons for detailed information.
+            See ? icons for detailed information on each type of tag.
             
-            Want to see how Auto-BG performs on a known game? Select any of the three pre-configured demos below!
+            Select any pre-configured demo below to see how Auto-BG works on the tag set for a popular board game. 
             """
         )
     
@@ -173,14 +192,15 @@ def application():
 
     with st.expander('Demos'):
 
-        st.write("""Below are some buttons to run Auto-BG on some real games you might have heard of.
-                 Press the button, and the corresponding attribute types will be placed into the drop-down fields below.
-                 Then press run to see what Auto-BG comes up with!""")
+        st.write("""These buttons run Auto-BG on the tag set for real games you might be familiar with,
+                 choose a button and the corresponding tags automatically fill the selectors below.
+                 Press run and see how Auto-BG creates an alternate concept for these hit titles!
+                 """)
 
         b1, b2, b3 =  st.columns(3)
 
     with b1:
-        SoC = st.button('Settlers of Catan')
+        SoC = st.button('Catan', use_container_width=True)
         if SoC:
             st.session_state.f_d = [
                 'Animals: Sheep',
@@ -202,7 +222,7 @@ def application():
             st.session_state.coop_d = 0
 
     with b2:
-        TtR = st.button('Ticket to Ride')
+        TtR = st.button('Ticket to Ride', use_container_width=True)
         if TtR:
             st.session_state.f_d = [
                 'Components: Map (Continental / National scale)',
@@ -223,7 +243,7 @@ def application():
             st.session_state.coop_d = 0
         
     with b3:
-        P = st.button('Pandemic')
+        P = st.button('Pandemic', use_container_width=True)
         if P:
             st.session_state.f_d = [
                 'Components: Map (Global Scale)',
@@ -258,22 +278,23 @@ def application():
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The primary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='Expanded genre tags.\n Maximum of three choices.')
         
         with col4:
             Mechanics_v = st.multiselect("Mechanics", options=pd.Series([x for x in category_keys[2] if x != "Cooperative Game"]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
 
         Cooperative_v = st.checkbox('Cooperative?', value=st.session_state.coop_d, key='CoopCheck')
-
-        run = st.button("Run Model")
+        
+        run = st.button("Run Model", use_container_width=True)
 
         if run:
             if st.session_state.inputs  == revert_cats(Game_v, Mechanics_v, Category_v, Family_v, Cooperative_v):
                 st.write('Inputs did not change, results currently loaded.')
             else:
-                st.session_state.output_dict = {}
-                st.session_state.title_iter = -1
+                
                 st.session_state.desc_iter = 0
+                st.session_state.title_iter = 0
+                st.session_state.output_dict = {}
 
                 if Cooperative_v == True:
                     Mechanics_v.append('Cooperative Game')
@@ -286,59 +307,41 @@ def application():
         results.empty()
     else:
         with results.expander('Results', expanded=True):
-        
-            
-            t_col1, t_col2 = st.columns(2)
-            with t_col1:
-                if st.button("See Previous Title"):
-                    show_title(-1)
-
-            with t_col2:
-                if st.button("See Next Title"):
-                    show_title(1)
-            
-            
-            d_col1, d_col2 = st.columns(2)
-            with d_col1:
-                if st.button("See Previous Description"):
-                    if st.session_state.desc_iter == 0:
-                        st.session_state.desc_iter = 2
-                        st.session_state.title_iter = -1
-                    else:
-                        st.session_state.desc_iter -= 1
-                        st.session_state.title_iter = -1
-                    show_title(1)
-
-            with d_col2:
-                if st.button("See Next Description"):
-                    if st.session_state.desc_iter == 2:
-                        st.session_state.desc_iter = 0
-                        st.session_state.title_iter = -1
-                    else:
-                        st.session_state.desc_iter += 1
-                        st.session_state.title_iter = -1
-                    show_title(1)
 
             st.write(
                 """
                 #### Title:
                 """)
+            
+            
+            
             st.write(st.session_state.cur_pair[0])
+
+
+            t_col1, t_col2 = st.columns(2)
+            with t_col1:
+                st.button("See Previous Title", on_click=PT_button_clicked, use_container_width=True)
+
+            with t_col2:
+                st.button("See Next Title", on_click=NT_button_clicked, use_container_width=True)
 
             st.write(
                 """
                 ####  Description:
                 """)
-            st.write(st.session_state.cur_pair[1])
+            st.write(st.session_state.cur_pair[1].replace('$','\$'))
+            
+            d_col1, d_col2 = st.columns(2)
+            with d_col1:
+                st.button("See Previous Description", on_click=PD_button_clicked, use_container_width=True)
 
+            with d_col2:
+                st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
+                    
 
-
-def demo():
-    st.text('This is demo, wow more changes')
 
 page_names_to_funcs = {
-    "Application": application,
-    "Demo": demo
+    "Application": application
 }
 
 demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
