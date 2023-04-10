@@ -43,6 +43,7 @@ class Title_Generator:
         self.out_titles = None
         self.best_title = None
         self.description = None
+        self.nlp = spacy.load("en_core_web_md")
 
 
     def candidate_generator(self, description):
@@ -89,8 +90,6 @@ class Title_Generator:
             candidates = self.candidate_generator(gen_desc)
             next = [cand for cand in candidates[0]+hold if not reg.search(cand)]
             candidates = (next, desc)
-        
-        nlp=spacy.load("en_core_web_md")
 
         #check for existing games and duplicates
         #transform function from https://stackoverflow.com/questions/42165779/python-how-to-remove-duplicate-valuescase-insensitive-from-a-list-with-same-o
@@ -123,8 +122,8 @@ class Title_Generator:
         #text processing
         token_cand = doc_text_preprocessing(pd.Series(clean_cand))
         token_art = doc_text_preprocessing(pd.Series([candidates[1]]))
-        sim = [nlp(title) for title in [" ".join(title) for title in token_cand]]
-        doc = nlp(" ".join(token_art[0]))
+        sim = [self.nlp(title) for title in [" ".join(title) for title in token_cand]]
+        doc = self.nlp(" ".join(token_art[0]))
 
         #scores cosine similarity between generated titles and body text, if the word is unknown (i.e. generator knows it but spacy doesn't)
         #it assigns a random probability to populate

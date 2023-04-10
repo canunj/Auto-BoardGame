@@ -15,7 +15,6 @@ def application():
     import gzip
     import io
     from description_generator import input_manager, model_control
-    import  Model_Constants as mc
 
     #UI Session Variables
     if 'desc_iter' not in st.session_state:
@@ -161,7 +160,7 @@ def application():
     @st.cache_resource
     def setup_models():
         spacy.cli.download("en_core_web_md")
-        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
+        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(apikey=st.secrets.key,model_id=st.secrets.model)
 
     Tgen, iman, mctrl = setup_models()
     
