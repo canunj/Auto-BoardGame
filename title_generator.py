@@ -1,14 +1,18 @@
 import pandas as pd
 import re
+import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
 import spacy
 import torch
 from transformers import T5ForConditionalGeneration,T5Tokenizer
+import random
+from operator import itemgetter
 
 #Custom text tokenizer from https://github.com/canunj/deconstructing_games by N Canu & K Chen
 def doc_text_preprocessing(ser):
-    nlp=spacy.load("en_core_web_sm", exclude=['parser','ner','textcat'])
+    nlp=spacy.load("en_core_web_md", exclude=['parser','ner','textcat'])
 
     """text processing steps"""
     import re
@@ -68,8 +72,7 @@ class Title_Generator:
         return candidates, description
     
     def candidate_score(self,candidates,ex_check=None):
-        import random
-        from operator import itemgetter
+        
         
         if ex_check != None:
             pat = re.compile("((?:" + "|".join(map(re.escape, candidates[0]+[cand.upper() for cand in candidates[0]])) + "|" + "|".join(ex_check) +"))")
@@ -87,7 +90,6 @@ class Title_Generator:
             next = [cand for cand in candidates[0]+hold if not reg.search(cand)]
             candidates = (next, desc)
         
-        #backup load function, will refactor
         nlp=spacy.load("en_core_web_md")
 
         #check for existing games and duplicates

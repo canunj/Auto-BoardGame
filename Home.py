@@ -140,17 +140,16 @@ def application():
     ###Variables
 
     ###Data
-    @st.cache_resource
+    @st.cache_data
     def fetch_data():
         slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
         search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/token_search.gz?raw=true")
         vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
         category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
-        coop = [1,0]
         st.sidebar.success("Fetched Data!")
-        return slim_df, search_tokens, vector_df, category_keys, coop
+        return slim_df, search_tokens, vector_df, category_keys
     
-    slim_df, search_tokens, vector_df, category_keys, coop = fetch_data()
+    slim_df, search_tokens, vector_df, category_keys = fetch_data()
     
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
@@ -161,6 +160,7 @@ def application():
     ###Models
     @st.cache_resource
     def setup_models():
+        spacy.cli.download("en_core_web_md")
         return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
 
     Tgen, iman, mctrl = setup_models()
