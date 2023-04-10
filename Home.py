@@ -169,7 +169,9 @@ def application():
 
     #UI
 
-    #Intro
+    #Application
+
+    ###Intro
     st.title("""Auto-BG: The Game Concept Generator""")
 
     with st.expander("How to use", expanded=True):
@@ -190,6 +192,7 @@ def application():
     
     results = st.empty()
 
+    ###Demo
     with st.expander('Demos'):
 
         st.write("""These buttons run Auto-BG on the tag set for real games you might be familiar with,
@@ -264,7 +267,7 @@ def application():
                 ]
             st.session_state.coop_d = 1
 
-    #Form
+    ###Form
     with st.expander("Auto-BG", expanded=True):
 
         col1, col2 = st.columns(2)
@@ -338,7 +341,6 @@ def application():
             with d_col2:
                 st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
                     
-
 def blog():
     """
     Blog describing the Auto-BG project
