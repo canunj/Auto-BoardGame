@@ -40,10 +40,13 @@ To implement a new instance of Auto-BG, follow these steps:
 5. Prepare training prompts - convert all active keys to period stopped tokens in a string for each game.
 6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
 NOTE: Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+---
+7. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
 
-8a. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
-8b. Add your API Key and model reference to secrets on your preferred hosting platform, use the Streamlit secrets framework to access values.
+OR
 
+8. Add your API Key and model reference to secrets on your preferred hosting platform, use the Streamlit secrets framework to access values.
+---
 9. You now have a customized instance of Auto-BG!
 
 ## Licensing
