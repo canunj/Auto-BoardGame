@@ -16,7 +16,7 @@ The Auto-BG (Board Game) tool is a text generation tool for creating board game 
 ## Features and Demo
 The main features of this application include:
 
-A user-friendly interface for Auto-BG can be found at (homepage).
+A user-friendly interface for Auto-BG can be found at https://huggingface.co/spaces/AutoBG/Auto-BoardGame.
 
 ## Examples
 
@@ -41,8 +41,17 @@ To implement a new instance of Auto-BG, follow these steps:
 6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
 NOTE: Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
 
-8. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
+8a. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
+8b. Add your API Key and model reference to secrets on your preferred hosting platform, use the Streamlit secrets framework to access values.
+
 9. You now have a customized instance of Auto-BG!
 
-## Citations and Licensing
-Auto-BG is licensed under CC BY-NC-SA 2.0, original data sourced from Recommend.Games @GitLab
+## Licensing
+Auto-BG is licensed under CC BY-NC-SA 2.0. Data sourced from Recommend.Games scraper @GitLab, all game data is property of BoardGameGeek.com.
+
+## About Us
+N. Canu trained & implemented text and title generator models for Auto-BG. Their current board game obsession is Obsession by Kayenta Games.
+S. Capp
+T. Druhot
+
+
