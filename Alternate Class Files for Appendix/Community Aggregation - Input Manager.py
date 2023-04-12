@@ -97,3 +97,18 @@ class input_manager:
         #converts to rank - this avoids splitting equal scoring groups inappropriately
         slim['rank'] = slim['score'].rank(ascending=False)
         return slim[slim['rank']<self.top_n].sort_values(by=['rank'])
+    
+    def query_score(self,outframe, gen_text):
+        #requires text processing function, nearest neighbor community dataframe, and piece of generated text
+        query = doc_text_preprocessing(pd.Series(gen_text))
+        desc_tokens = pd.concat([outframe['cleaned_descriptions'],pd.Series(query)])
+        desc_dict = corpora.Dictionary()
+        desc_corpus = [desc_dict.doc2bow(doc, allow_update=True) for doc in desc_tokens]
+        temp_index = get_tmpfile("index")
+        index = similarities.Similarity(temp_index, desc_corpus, num_features=len(desc_dict.token2id))
+
+        sim_stack = []
+        for sims in index:
+            sim_stack.append(sims)
+
+        return (gen_text,np.mean(np.multiply(out['score'],sim_stack[-1][:-1])))
