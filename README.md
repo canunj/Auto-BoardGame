@@ -3,7 +3,10 @@
 # Auto-BG
 LLM-based text generation tool for creating board game concepts (description & title)
 
-The Auto-BG (Board Game) tool is a text generation tool for creating board game concepts. It utilizes multiple large-language models to generate board game titles and descriptions tailored from user-input tags based on BoardGameGeek.com. The models used in this project include a trained T5 sequence-to-sequence model, primarily for title generation, and a robust GPT3 model for board game description generation. The T5 model was initially presented by Raffel et al. in ["Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"](https://arxiv.org/pdf/1910.10683.pdf). The GPT3 model builds from Brown et al.'s work in ["Language Models are Few-Shot Learners"](https://arxiv.org/pdf/1910.10683.pdf).
+Auto-BG (Board Game) is a text generation tool for creating board game concepts. It utilizes multiple large-language models to generate board game titles and descriptions tailored from user-input tags based on BoardGameGeek.com. The models used in this project include a trained T5 sequence-to-sequence model for title generation and a fine-tuned Curie-base GPT3 model for description generation. 
+
+
+The T5 model was initially presented by Raffel et al. in ["Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"](https://arxiv.org/pdf/1910.10683.pdf). The GPT3 model builds from Brown et al.'s work in ["Language Models are Few-Shot Learners"](https://arxiv.org/pdf/1910.10683.pdf).
 
 
 ## Table of Contents
@@ -16,7 +19,7 @@ The Auto-BG (Board Game) tool is a text generation tool for creating board game 
 ## Features and Demo
 The main features of this application include:
 
-A user-friendly interface for Auto-BG can be found at (homepage).
+A user-friendly interface for Auto-BG can be found at https://huggingface.co/spaces/AutoBG/Auto-BoardGame.
 
 ## Examples
 
@@ -40,9 +43,20 @@ To implement a new instance of Auto-BG, follow these steps:
 5. Prepare training prompts - convert all active keys to period stopped tokens in a string for each game.
 6. Fine-tune a selected model following the instructions at: https://platform.openai.com/docs/guides/fine-tuning
 NOTE: Auto-BG uses a Curie model with a lowered learning rate running for fewer epochs.
+---
+7. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
 
-8. Create a Model_Constants.py file with your personal API key and model instance based on the template above.
+OR
+
+8. Add your API Key and model reference to secrets on your preferred hosting platform, use the Streamlit secrets framework to access values.
+---
 9. You now have a customized instance of Auto-BG!
 
-## Citations and Licensing
-Auto-BG is licensed under CC BY-NC-SA 2.0, original data sourced from Recommend.Games @GitLab
+## Licensing
+Auto-BG is licensed under CC BY-NC-SA 2.0. Data sourced from Recommend.Games scraper @GitLab, all game data is property of BoardGameGeek.com.
+
+## About Us
+N. Canu trained & implemented text and title generator models for Auto-BG. Their current board game obsession is Obsession by Kayenta Games.
+S. Capp
+T. Druhot
+
