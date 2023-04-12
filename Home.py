@@ -141,10 +141,10 @@ def application():
     ###Data
     @st.cache_data
     def fetch_data():
-        slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
-        search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/token_search.gz?raw=true")
-        vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
-        category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
+        slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/slim_df.parquet.gzip?raw=true')
+        search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/token_search.gz?raw=true")
+        vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/vector_df.parquet.gzip?raw=true')
+        category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/current_keys.gz?raw=true")
         st.sidebar.success("Fetched Data!")
         return slim_df, search_tokens, vector_df, category_keys
     
