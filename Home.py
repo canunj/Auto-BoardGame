@@ -15,6 +15,7 @@ def application():
     import gzip
     import io
     from description_generator import input_manager, model_control
+    from pathlib import Path
 
     #UI Session Variables
     if 'desc_iter' not in st.session_state:
@@ -40,18 +41,16 @@ def application():
 
     #non-ui helper functions
     #reader code extended from https://gist.github.com/thearn/5424244 for alternate load format
-    def reader(url):
-        url_file = io.BytesIO(urllib.request.urlopen(url).read())
-        f = gzip.GzipFile(fileobj=url_file)
+    def reader(path):
+        f = gzip.GzipFile(filename=path)
         data = f.read()
         obj = pickle.loads(data)
         f.close()
         return obj
             
-    def token_expand(url):
+    def token_expand(path):
         nlp = spacy.blank("en")
-        url_file = urllib.request.urlopen(url)
-        f = gzip.GzipFile(fileobj=url_file)
+        f = gzip.GzipFile(filename=path)
         data = f.read()
         obj = pickle.loads(data)
         f.close()
@@ -84,8 +83,6 @@ def application():
             descs.append(out)
             st.sidebar.success("Prompt " +str(status+1)+ " generated!")
         st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
-
-
 
     def title_check(next=0):
         if next==1:
@@ -141,11 +138,11 @@ def application():
     ###Data
     @st.cache_data
     def fetch_data():
-        slim_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/slim_df.parquet.gzip?raw=true')
-        search_tokens = token_expand("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/token_search.gz?raw=true")
-        vector_df = pd.read_parquet('https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/vector_df.parquet.gzip?raw=true')
-        category_keys = reader("https://github.com/canunj/Auto-BoardGame/blob/main/Persistent_Data/current_keys.gz?raw=true")
-        st.sidebar.success("Fetched Data!")
+        #path load solution from https://stackoverflow.com/questions/69768380/share-streamlit-cant-find-pkl-file
+        slim_df = pd.read_parquet(Path(__file__).parent / "Persistent_Data/slim_df.parquet.gzip")
+        search_tokens = token_expand(Path(__file__).parent / "Persistent_Data/token_search.gz")
+        vector_df = pd.read_parquet(Path(__file__).parent / 'Persistent_Data/vector_df.parquet.gzip')
+        category_keys = reader(Path(__file__).parent / "Persistent_Data/current_keys.gz")
         return slim_df, search_tokens, vector_df, category_keys
     
     slim_df, search_tokens, vector_df, category_keys = fetch_data()

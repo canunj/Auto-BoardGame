@@ -49,7 +49,7 @@ class input_manager:
         #preserve global key and ouput copy w/input keys activated to 1
         d = self.key.copy()
         for cat in k_flags:
-        d[cat] = 1.0
+            d[cat] = 1.0
         return d
     
     def input_parser(self,in_vec):
@@ -71,7 +71,7 @@ class input_manager:
         if len(cand_slim) < self.top_n:
             cand_slim = self.key_df.iloc[list(inter[inter>=1].index)]
 
-        return ks
+        return ks,cand_slim,in_vec.values()
 
   #calculating per community vector pairwise jaccard similarity to input split by feature class
     def ret_jaccard(self,in_vec,t_vec):

@@ -6,24 +6,49 @@ LLM-based text generation tool for creating board game concepts (description & t
 Auto-BG (Board Game) is a text generation tool for creating board game concepts. It utilizes multiple large-language models to generate board game titles and descriptions tailored from user-input tags based on BoardGameGeek.com. The models used in this project include a trained T5 sequence-to-sequence model for title generation and a fine-tuned Curie-base GPT3 model for description generation. 
 
 
-The T5 model was initially presented by Raffel et al. in ["Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"](https://arxiv.org/pdf/1910.10683.pdf). The GPT3 model builds from Brown et al.'s work in ["Language Models are Few-Shot Learners"](https://arxiv.org/pdf/1910.10683.pdf).
+The T5 model was initially presented by Raffel et al. in ["Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"](https://arxiv.org/pdf/1910.10683.pdf). The GPT3 model builds from Brown et al.'s work in ["Language Models are Few-Shot Learners"](https://arxiv.org/abs/2005.14165).
 
 
-## Table of Contents
-- Features and Demo
-- Examples
-- Project Structure
-- Customizing Auto-BG
-- Citations and Licensing
-
-## Features and Demo
+## Features
 The main features of this application include:
 
-A user-friendly interface for Auto-BG can be found at https://huggingface.co/spaces/AutoBG/Auto-BoardGame.
+- Intuitive text generation through an easy to use tag selector.
+- Suggested title generation with multiple options for every prompt.
+- Demos based on the tags for three popular games to orient users in Auto-BG.
 
-## Examples
+The user-friendly interface for Auto-BG can be found at https://huggingface.co/spaces/AutoBG/Auto-BoardGame.
+
+Auto-BG has confirmed compatability with Chrome, Firefox, & Edge along with their mobile equivalents. Other interfaces should work but aren't tested.
 
 ## Project Structure
+
+###Required Files
+Auto-BG's required files consist of:
+
+3 Python files-
+
+Home.py - The Streamlit app framework and runs all generation functions through a central script.
+description_generator.py - The input manager and text generation model control classes.
+title_generator.py - The title generation model control and title generation/cleanup classes.
+
+t5_model folder containing all required configuration and model files to run our trained title generator.
+
+Persistent_Data folder containing 4 data files -
+
+slim_df.parquet.gzip - Game data including name, description, tokenized descriptions, and language tag.
+vector_df.parquet.gzip - Game data including only the one-hot tag vectors.
+
+current_keys.gz - List object containing an up-to-date ground truth key set for tags.
+token_search.gz - SpaCy preprocessed tokens for all existing keys, required for matching unknown keys efficiently.
+
+###Running Auto-BG
+Must be loaded into a properly configured Streamlit space or a local repo with a secrets.toml file. Secrets must include a "key" variable with a valid OpenAI API key and a "model" variable with a valid OpenAI model reference value.
+
+1. Run Home.py
+
+That's it!
+
+Home.py will open Streamlit in your browser, load all data files, and configure the model control classes. When tags are selected and "Run Model" is chosen, Home.py will call description_generator and title_generator in sequence then return the output dictionary with titles and descriptions in the UI.
 
 ## Customizing Auto-BG
 NOTE: Auto-BG uses a fine-tuned GPT-3 Curie model that will be inaccessible without an organizational API key, 
