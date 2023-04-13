@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
-tab1, tab2, tab3 = st.tabs(['App', 'Blog', 'About Us'])
+tab1, tab2, tab3, tab4 = st.tabs(['App', 'Blog', 'Feedback', 'About Us'])
 
 def application():
     ###Imports
@@ -404,6 +404,25 @@ def about_us():
         *MADS (Master of Applied Data Science)*\n
         """)
 
+def feedback():
+    import pandas as pd
+    from pathlib import Path
+    
+    st.subheader('Leave comments below')
+
+    with st.form('feed',clear_on_submit=True):
+        f = st.text_area('Feedback')
+        sub = st.form_submit_button('Submit')
+    
+        if sub:
+            feed_ser = pd.read_csv(Path(__file__).parent / "Persistent_Data/Feedback.csv")
+            f_s = pd.Series(f)
+            feed_ser = feed_ser.append(f_s, ignore_index=True)
+            feed_ser.to_csv(Path(__file__).parent / "Persistent_Data/Feedback.csv")
+
+
+
+
 with tab1:
     application()
 
@@ -411,4 +430,7 @@ with tab2:
     blog()
 
 with tab3:
+    feedback()
+
+with tab4:
     about_us()
