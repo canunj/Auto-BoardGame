@@ -81,7 +81,7 @@ Auto-BG is licensed under CC BY-NC-SA 2.0. Data sourced from Recommend.Games scr
 ## About Us
 N. Canu trained, evaluated, & implemented text and title generator models for Auto-BG. Their current board game obsession is Obsession by Kayenta Games.
 
-S. Capp assisted with model research, initial text generator implementation, and tailoring of streamlit application elements. Immense fan of Catan, Coup, and any deduction games.
+S. Capp assisted with research, parts of initial text generator, aspects of streamlit application, and some visualizations. Immense fan of Catan, Coup, and any deduction games.
 
 T. Druhot designed personas, user journeys, and wireframes for the user interface. Turned title model notebook into module and built UI front end and integrated model modules into end user functionality. Avid Magic the Gathering Limited player and deck/engine building board games.
 
