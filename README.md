@@ -21,25 +21,40 @@ Auto-BG has confirmed compatability with Chrome, Firefox, & Edge along with thei
 ## Project Structure
 
 ### Required Files
-Auto-BG's required files consist of:
+
 
 *Main*
 
-Home.py - The Streamlit app framework and runs all generation functions through a central script.
-description_generator.py - The input manager and text generation model control classes.
-title_generator.py - The title generation model control and title generation/cleanup classes.
+Home.py - The Streamlit app framework and runs all generation functions through a central script.\
+\
+description_generator.py - The input manager and text generation model control classes.\
+\
+title_generator.py - The title generation model control and title generation/cleanup classes.\
+\
+\
+*t5_model*\
+\
+All required configuration and model files to run our trained title generator.\
+\
+\
+*Persistent_Data*\
+\
+slim_df.parquet.gzip - Game data including name, description, tokenized descriptions, and language tag.\
+\
+vector_df.parquet.gzip - Game data including only the one-hot tag vectors.\
+\
+current_keys.gz - List object containing an up-to-date ground truth key set for tags.\
+\
+token_search.gz - SpaCy preprocessed tokens for all existing keys, required for matching unknown keys efficiently.\
 
-*t5_model*
-
-All required configuration and model files to run our trained title generator.
-
-*Persistent_Data*
-
-slim_df.parquet.gzip - Game data including name, description, tokenized descriptions, and language tag.
-vector_df.parquet.gzip - Game data including only the one-hot tag vectors.
-
-current_keys.gz - List object containing an up-to-date ground truth key set for tags.
-token_search.gz - SpaCy preprocessed tokens for all existing keys, required for matching unknown keys efficiently.
+### Optional Files
+*Alternate Class Files for Appendix*\
+\
+Community Aggregation - Input Manager.py - An alternative input class for description_generator.py that includes community nearest neighbor calculations.\
+\
+*Stream_to_Output*\
+\
+Game_Cleaner.py - A script for processing scraper output files into the format used inside of Auto-BG.\
 
 ### Running Auto-BG
 #### with Streamlit Secrets
