@@ -2,28 +2,23 @@ import streamlit as st
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
+tab1, tab2, tab3 = st.tabs(['App', 'Blog', 'About Us'])
+
 def application():
     ###Imports
-    import streamlit as st
     import pandas as pd
     import numpy as np
     import re
-    import nltk
     import urllib
     import pickle
-    from nltk.corpus import stopwords
-    from gensim.parsing import preprocess_string, strip_tags, strip_numeric, strip_multiple_whitespaces, stem_text, strip_punctuation, remove_stopwords
-    import spacy, en_core_web_sm
-    import torch
-    from torch import nn
-    import torch.nn.functional as F
-    from transformers import T5ForConditionalGeneration,T5Tokenizer
+    import spacy
+    from spacy.tokens import DocBin
     from title_generator import Title_Generator
     import gzip
     import io
-    from spacy.tokens import DocBin
+    from datetime import date
     from description_generator import input_manager, model_control
-    import  Model_Constants as mc
+    from pathlib import Path
 
     #UI Session Variables
     if 'desc_iter' not in st.session_state:
@@ -47,19 +42,18 @@ def application():
     if 'coop_d' not in st.session_state:
         st.session_state.coop_d = 0
 
-    #non-ui helper functions
-    def reader(url):
-        url_file = io.BytesIO(urllib.request.urlopen(url).read())
-        f = gzip.GzipFile(fileobj=url_file)
+    #helper functions
+    #reader code extended from https://gist.github.com/thearn/5424244 for alternate load format
+    def reader(path):
+        f = gzip.GzipFile(filename=path)
         data = f.read()
         obj = pickle.loads(data)
         f.close()
         return obj
             
-    def token_expand(url):
+    def token_expand(path):
         nlp = spacy.blank("en")
-        url_file = urllib.request.urlopen(url)
-        f = gzip.GzipFile(fileobj=url_file)
+        f = gzip.GzipFile(filename=path)
         data = f.read()
         obj = pickle.loads(data)
         f.close()
@@ -90,12 +84,10 @@ def application():
             inter_pair = Tgen.candidate_generator(clean_desc)
             out = Tgen.candidate_score(inter_pair,ex_check)
             descs.append(out)
-            st.sidebar.success("Prompt " +str(status+1)+ " generated!")
+            results.success("Prompt " +str(status+1)+ "/3 Generated!")
         st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
 
-
-
-    def title_check(next=-1):
+    def title_check(next=0):
         if next==1:
             if st.session_state.title_iter == (len(st.session_state.output_dict[st.session_state.desc_iter]['titles'])-1):
                 st.session_state.title_iter = 0
@@ -142,43 +134,57 @@ def application():
             st.session_state.title_iter = 0
         show_title(0)
 
+    def report():
+        inputs = '|'.join(str(x) for x in st.session_state.inputs) 
+        data = {'rprtd':  date.today(),'inpts': inputs, 'title': st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0], 'desc':st.session_state.output_dict[st.session_state.desc_iter]['text']}
+        try:
+            r_df = pd.DataFrame(data, index=[0])
+            r_p = pd.read_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
+            w_p = pd.concat([r_df, r_p])
+            w_p = w_p.drop_duplicates()
+            print('try')
+            print(w_p)
+            w_p.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
+        except: 
+            print('except')
+            print(r_df) 
+            r_df.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
 
-        
+    
     ###Variables
 
     ###Data
-    @st.cache_resource
+    @st.cache_data
     def fetch_data():
-        slim_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/slim_df.parquet.gzip?raw=true')
-        search_tokens = token_expand("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/token_search.gz?raw=true")
-        vector_df = pd.read_parquet('https://github.com/canunj/GameDescGenerator/blob/main/Model_Step_Data/vector_df.parquet.gzip?raw=true')
-        category_keys = reader("https://github.com/canunj/GameDescGenerator/blob/main/Persistent%20Objects/current_keys.gz?raw=true")
-        coop = [1,0]
-        st.sidebar.success("Fetched Data!")
-        return slim_df, search_tokens, vector_df, category_keys, coop
+        #path load solution from https://stackoverflow.com/questions/69768380/share-streamlit-cant-find-pkl-file
+        slim_df = pd.read_parquet(Path(__file__).parent / "Persistent_Data/slim_df.parquet.gzip")
+        search_tokens = token_expand(Path(__file__).parent / "Persistent_Data/token_search.gz")
+        vector_df = pd.read_parquet(Path(__file__).parent / 'Persistent_Data/vector_df.parquet.gzip')
+        category_keys = reader(Path(__file__).parent / "Persistent_Data/current_keys.gz")
+        return slim_df, search_tokens, vector_df, category_keys
     
-    slim_df, search_tokens, vector_df, category_keys, coop = fetch_data()
-
-    #Is this needed????
+    slim_df, search_tokens, vector_df, category_keys = fetch_data()
+    
     ex_check = ["[Ee]verquest","[Cc]ivilization [Ii][IiVv]","[Cc]ivilization(?=:)","[Cc]ivilization [Ii][Ii]",
             "[Cc]ivilization [Ii][Ii][Ii]","[Cc]ivilization V","[Aa]ge [Oo]f [Ee]mpires [Ii][Ii2]([Ii]|\b)", "[Rr]avenloft|[Cc]astle [Rr]avenloft",
             "[Ss]cythe(?=:|\b)","[Dd]ungeons [&Aa][ n][Dd ][ Ddr][Ddra][rg][oa][gn][os](ns|\b)",
             "[Aa]ge [Oo]f [Ee]mpires [Ii][Ii]: [Tt]he [Aa]ge [Oo]f [Kk]ings","[Aa]ge [Oo]f [Ee]mpires 2: [Tt]he [Aa]ge [Oo]f [Kk]ings",
-            "[Aa]ge [Oo]f [Ee]mpires"] 
+            "[Aa]ge [Oo]f [Ee]mpires","Doctor Who"] 
 
     ###Models
     @st.cache_resource
     def setup_models():
-        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(mc.SEND_KEY())
+        spacy.cli.download("en_core_web_md")
+        return Title_Generator('./t5_model', slim_df), input_manager(vector_df, slim_df, search_tokens),  model_control(apikey=st.secrets.key,model_id=st.secrets.model)
 
     Tgen, iman, mctrl = setup_models()
     
-
-
     #UI
 
-    #Intro
-    st.title("""Auto-BG: The Game Concept Generator!""")
+    #Application
+
+    ###Intro
+    st.title("""Auto-BG: The Game Concept Generator""")
 
     with st.expander("How to use", expanded=True):
         st.write(
@@ -186,27 +192,30 @@ def application():
             Discover the concept for your next favorite game!
                         
             How do you use Auto-BG?
-            Pick any set of choices from four selectors below: Family, Game, Mechanic, and Category.
+
+            Pick any set of tags from four selectors below: Family, Game, Mechanic, and Category.
             If you are looking to lose together - activate the cooperative toggle.
             
-            See ? icons for detailed information.
+            See ? icons for detailed information on each type of tag.
             
-            Want to see how Auto-BG performs on a known game? Select any of the three pre-configured demos below!
+            Select any pre-configured demo below to see how Auto-BG works on the tag set for a popular board game. 
             """
         )
     
     results = st.empty()
 
+    ###Demo
     with st.expander('Demos'):
 
-        st.write("""Below are some buttons to run Auto-BG on some real games you might have heard of.
-                 Press the button, and the corresponding attribute types will be placed into the drop-down fields below.
-                 Then press run to see what Auto-BG comes up with!""")
+        st.write("""These buttons run Auto-BG on the tag set for real games you might be familiar with,
+                 choose a button and the corresponding tags automatically fill the selectors below.
+                 Press run and see how Auto-BG creates an alternate concept for these hit titles!
+                 """)
 
         b1, b2, b3 =  st.columns(3)
 
     with b1:
-        SoC = st.button('Settlers of Catan', use_container_width=True)
+        SoC = st.button('Catan', use_container_width=True)
         if SoC:
             st.session_state.f_d = [
                 'Animals: Sheep',
@@ -261,7 +270,6 @@ def application():
             st.session_state.g_d = ['Family Game', 'Strategy Game']
             st.session_state.m_d = [
                 'Action Points',
-                'Cooperative Game',
                 'Point to Point Movement',
                 'Trading',
                 'Variable Player Powers'
@@ -271,13 +279,13 @@ def application():
                 ]
             st.session_state.coop_d = 1
 
-    #Form
+    ###Form
     with st.expander("Auto-BG", expanded=True):
 
         col1, col2 = st.columns(2)
     
         with col1:
-            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4]), key='Family', default=st.session_state.f_d, max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
+            Family_v = st.multiselect("Family", options=pd.Series(category_keys[4][8:]), key='Family', default=st.session_state.f_d, max_selections=6, help='Descriptive niches for groupings of games.\n Maximum of six choices.')
     
         with col2:
             Game_v = st.multiselect("Game", options=pd.Series(category_keys[1]), key='Game', default=st.session_state.g_d, max_selections=2, help='Top level genres - Family, Strategy, etc.\n Maximum of two choices.')
@@ -285,10 +293,10 @@ def application():
         col3, col4 = st.columns(2)
 
         with col3:
-            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='The stmary genres.\n Maximum of three choices.')
+            Category_v = st.multiselect("Category", options=pd.Series(category_keys[3]), key='Category', default=st.session_state.c_d, max_selections=3, help='Expanded genre tags.\n Maximum of three choices.')
         
         with col4:
-            Mechanics_v = st.multiselect("Mechanics", options=pd.Series(category_keys[2]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
+            Mechanics_v = st.multiselect("Mechanics", options=pd.Series([x for x in category_keys[2] if x != "Cooperative Game"]), key='Mechanic', default=st.session_state.m_d, max_selections=5, help='Game rules!\n Maximum of five choices.')
 
         Cooperative_v = st.checkbox('Cooperative?', value=st.session_state.coop_d, key='CoopCheck')
         
@@ -344,16 +352,63 @@ def application():
 
             with d_col2:
                 st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
-                    
 
-def demo():
-    st.text('This is demo, wow more changes')
+            st.button('Report', on_click=report, use_container_width=True)
 
-page_names_to_funcs = {
-    "Application": application,
-    "Demo": demo
-}
+def blog():
+    """
+    Blog describing the Auto-BG project
+    """
+    with open("BGG Blog MD.md", 'r') as blog_md:
+        blog_text = blog_md.read() 
+    st.markdown(blog_text)
+    st.sidebar.subheader('Auto-BG: The Board Game Concept Generator')
+    st.sidebar.write("*This application attempts to augment one step, early in that journey, when the seeds of an idea combine and sprout into a holistic concept.\
+                      By interpreting disparate mechanical and descriptive tags to identify a game concept, Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
+                      These descriptions support designers-to-be as alternatives to current concepts, seeds for future concepts, or any user as, hopefully, an entertaining thought experiment.*")
 
-demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
-page_names_to_funcs[demo_name]()
+def about_us():
+    """
+    About us page describing creators of Auto-BG
+    """
+    st.title("About Us")
+    st.sidebar.subheader('Creators of Auto-BG')
+    st.sidebar.write('*With a shared love of data science and board games, we came together and created Auto-BG as part of our Capstone project\
+                     for our "Master of Applied Data Science" program at the University of Michigan.\
+                     We hope you enjoy!*')
 
+    # Columns containing information on each of the creators
+    col1, col2, col3 = st.columns([1,1,1])
+
+    with col1:
+        st.image('./NC.jfif', use_column_width=True)
+        st.subheader('Nick Canu')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
+    
+    with col2:
+        st.image('./TD.jfif', use_column_width=True)
+        st.subheader('Taylor Druhot')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
+
+    with col3:
+        st.image('./SC.jfif', use_column_width=True)
+        st.subheader('Sebastian Capp')
+        st.write("""
+        **University of Michigan**\n
+        *MADS (Master of Applied Data Science)*\n
+        """)
+
+with tab1:
+    application()
+
+with tab2:
+    blog()
+
+with tab3:
+    about_us()
