@@ -2,6 +2,8 @@ import streamlit as st
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
+tab1, tab2, tab3 = st.tabs(['App', 'Blog', 'About Us'])
+
 def application():
     ###Imports
     import pandas as pd
@@ -14,6 +16,7 @@ def application():
     from title_generator import Title_Generator
     import gzip
     import io
+    from datetime import date
     from description_generator import input_manager, model_control
     from pathlib import Path
 
@@ -39,7 +42,7 @@ def application():
     if 'coop_d' not in st.session_state:
         st.session_state.coop_d = 0
 
-    #non-ui helper functions
+    #helper functions
     #reader code extended from https://gist.github.com/thearn/5424244 for alternate load format
     def reader(path):
         f = gzip.GzipFile(filename=path)
@@ -81,7 +84,7 @@ def application():
             inter_pair = Tgen.candidate_generator(clean_desc)
             out = Tgen.candidate_score(inter_pair,ex_check)
             descs.append(out)
-            st.sidebar.success("Prompt " +str(status+1)+ " generated!")
+            results.success("Prompt " +str(status+1)+ "/3 Generated!")
         st.session_state.output_dict = {0:descs[0],1:descs[1],2:descs[2]}
 
     def title_check(next=0):
@@ -131,8 +134,23 @@ def application():
             st.session_state.title_iter = 0
         show_title(0)
 
+    def report():
+        inputs = '|'.join(str(x) for x in st.session_state.inputs) 
+        data = {'rprtd':  date.today(),'inpts': inputs, 'title': st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0], 'desc':st.session_state.output_dict[st.session_state.desc_iter]['text']}
+        try:
+            r_df = pd.DataFrame(data, index=[0])
+            r_p = pd.read_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
+            w_p = pd.concat([r_df, r_p])
+            w_p = w_p.drop_duplicates()
+            print('try')
+            print(w_p)
+            w_p.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
+        except: 
+            print('except')
+            print(r_df) 
+            r_df.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
 
-        
+    
     ###Variables
 
     ###Data
@@ -161,8 +179,6 @@ def application():
 
     Tgen, iman, mctrl = setup_models()
     
-
-
     #UI
 
     #Application
@@ -336,7 +352,9 @@ def application():
 
             with d_col2:
                 st.button("See Next Description", on_click=ND_button_clicked, use_container_width=True)
-                    
+
+            st.button('Report', on_click=report, use_container_width=True)
+
 def blog():
     """
     Blog describing the Auto-BG project
@@ -386,12 +404,11 @@ def about_us():
         *MADS (Master of Applied Data Science)*\n
         """)
 
-page_names_to_funcs = {
-    "Application": application,
-    "Blog": blog,
-    "About Us": about_us, 
-}
+with tab1:
+    application()
 
-demo_name = st.sidebar.selectbox("Choose a page:", page_names_to_funcs.keys())
-page_names_to_funcs[demo_name]()
+with tab2:
+    blog()
 
+with tab3:
+    about_us()
