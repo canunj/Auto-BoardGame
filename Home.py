@@ -1,4 +1,5 @@
 import streamlit as st
+import base64
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
@@ -19,6 +20,7 @@ def application():
     from datetime import date
     from description_generator import input_manager, model_control
     from pathlib import Path
+    import base64
 
     #UI Session Variables
     if 'desc_iter' not in st.session_state:
@@ -359,23 +361,32 @@ def blog():
     """
     Blog describing the Auto-BG project
     """
-    with open("BGG Blog MD.md", 'r') as blog_md:
-        blog_text = blog_md.read() 
-    st.markdown(blog_text)
-    st.sidebar.subheader('Auto-BG: The Board Game Concept Generator')
-    st.sidebar.write("*This application attempts to augment one step, early in that journey, when the seeds of an idea combine and sprout into a holistic concept.\
-                      By interpreting disparate mechanical and descriptive tags to identify a game concept, Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
-                      These descriptions support designers-to-be as alternatives to current concepts, seeds for future concepts, or any user as, hopefully, an entertaining thought experiment.*")
+    st.write('### Auto-BG: The Board Game Concept Generator')
+    st.write("#### Abstract")
+    st.write("*This application attempts to augment one step, early in that journey, when the seeds of an idea combine and sprout into a holistic concept.\
+             By interpreting disparate mechanical and descriptive tags to identify a game concept, Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
+             These descriptions support designers-to-be as alternatives to current concepts, seeds for future concepts, or any user as, hopefully, an entertaining thought experiment.\
+             More information included in the associated paper.*")
+    
+    # Code adapted from "Display and Download PDF in Streamlit: A Blog Use Case" by My Data Talk, https://towardsdatascience.com/display-and-download-pdf-in-streamlit-a-blog-use-case-5fc1ac87d4b1
+    with open('Auto_BG_blog.pdf', "rb") as blog_file:
+        blog_pdf = base64.b64encode(blog_file.read()).decode('utf-8')
+        blog_display = f'<center><iframe src="data:application/pdf;base64,{blog_pdf}" width=800 height=800 type="application/pdf"></iframe><center>'
+
+    st.markdown(blog_display, unsafe_allow_html=True)
+
+
 
 def about_us():
     """
     About us page describing creators of Auto-BG
     """
-    st.title("About Us")
-    st.sidebar.subheader('Creators of Auto-BG')
-    st.sidebar.write('*With a shared love of data science and board games, we came together and created Auto-BG as part of our Capstone project\
-                     for our "Master of Applied Data Science" program at the University of Michigan.\
-                     We hope you enjoy!*')
+
+    st.write('### Creators of Auto-BG')
+    st.write('*With a shared love of data science and board games, we came together and created Auto-BG as part of our Capstone project\
+             for our "Master of Applied Data Science" program at the University of Michigan.\
+             We hope you enjoy!*')
+    st.write("\n")
 
     # Columns containing information on each of the creators
     col1, col2, col3 = st.columns([1,1,1])
@@ -385,7 +396,9 @@ def about_us():
         st.subheader('Nick Canu')
         st.write("""
         **University of Michigan**\n
-        *MADS (Master of Applied Data Science)*\n
+        ***Master of Applied Data Science, Class of 2023***\n
+        Trained & implemented text and title models for Auto-BG, and led drafting and revision for blog.\n
+        Their current board game obsession is Obsession by Kayenta Games.
         """)
     
     with col2:
@@ -393,7 +406,9 @@ def about_us():
         st.subheader('Taylor Druhot')
         st.write("""
         **University of Michigan**\n
-        *MADS (Master of Applied Data Science)*\n
+        ***Master of Applied Data Science, Class of 2023***\n
+        Scoped and designed the Auto-BG UI,and implemented the integrated Streamlit application for Auto-BG.\n
+        Avid Magic the Gathering Limited player and deck/engine building board games.
         """)
 
     with col3:
@@ -401,7 +416,9 @@ def about_us():
         st.subheader('Sebastian Capp')
         st.write("""
         **University of Michigan**\n
-        *MADS (Master of Applied Data Science)*\n
+        ***Master of Applied Data Science, Class of 2023***\n
+        Led literature reviews, assisted with practical model research, visualizations, & UI components.\n
+        Immense fan of Catan, Coup, and any deduction games.
         """)
 
 def feedback():
