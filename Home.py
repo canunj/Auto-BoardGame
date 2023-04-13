@@ -381,7 +381,7 @@ def about_us():
     col1, col2, col3 = st.columns([1,1,1])
 
     with col1:
-        st.image('./NC.jfif', use_column_width=True)
+        st.image('./About_Us_Images/NC.jfif', use_column_width=True)
         st.subheader('Nick Canu')
         st.write("""
         **University of Michigan**\n
@@ -389,7 +389,7 @@ def about_us():
         """)
     
     with col2:
-        st.image('./TD.jfif', use_column_width=True)
+        st.image('./About_Us_Images/TD.jfif', use_column_width=True)
         st.subheader('Taylor Druhot')
         st.write("""
         **University of Michigan**\n
@@ -397,7 +397,7 @@ def about_us():
         """)
 
     with col3:
-        st.image('./SC.jfif', use_column_width=True)
+        st.image('./About_Us_Images/SC.jfif', use_column_width=True)
         st.subheader('Sebastian Capp')
         st.write("""
         **University of Michigan**\n
