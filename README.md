@@ -22,7 +22,7 @@ Auto-BG has confirmed compatability with Chrome, Firefox, & Edge along with thei
 
 ## Project Structure
 
-###Required Files
+### Required Files
 Auto-BG's required files consist of:
 
 3 Python files-
@@ -41,7 +41,7 @@ vector_df.parquet.gzip - Game data including only the one-hot tag vectors.
 current_keys.gz - List object containing an up-to-date ground truth key set for tags.
 token_search.gz - SpaCy preprocessed tokens for all existing keys, required for matching unknown keys efficiently.
 
-###Running Auto-BG
+### Running Auto-BG
 Must be loaded into a properly configured Streamlit space or a local repo with a secrets.toml file. Secrets must include a "key" variable with a valid OpenAI API key and a "model" variable with a valid OpenAI model reference value.
 
 1. Run Home.py
