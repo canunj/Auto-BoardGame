@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import boto3
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
@@ -21,6 +22,10 @@ def application():
     from description_generator import input_manager, model_control
     from pathlib import Path
     import base64
+
+    #S3 Bucket
+    session = boto3.Session(aws_access_key_id=st.secrets.accesskey, aws_secret_access_key=st.secrets.secretaccesskey)
+
 
     #UI Session Variables
     if 'desc_iter' not in st.session_state:
@@ -136,23 +141,18 @@ def application():
             st.session_state.title_iter = 0
         show_title(0)
 
-    def report():
+    def report():       
         inputs = '|'.join(str(x) for x in st.session_state.inputs) 
         data = {'rprtd':  date.today(),'inpts': inputs, 'title': st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0], 'desc':st.session_state.output_dict[st.session_state.desc_iter]['text']}
-        try:
-            r_df = pd.DataFrame(data, index=[0])
-            r_p = pd.read_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
-            w_p = pd.concat([r_df, r_p])
-            w_p = w_p.drop_duplicates()
-            print('try')
-            print(w_p)
-            w_p.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
-        except: 
-            print('except')
-            print(r_df) 
-            r_df.to_pickle(Path(__file__).parent / "Persistent_Data/reported_df.PICKLE")
 
-    
+        s3=session.client('s3')
+        reportedjson = s3.get_object(Bucket='auto-bg', Key='reported.json')
+        r_d = pd.read_json(reportedjson.get("Body"))
+        r_df = pd.DataFrame(data, index=[len(r_d)+1])
+        w_p = pd.concat([r_df, r_d])
+        w_p = w_p.drop_duplicates().reset_index(drop=True)
+        s3.put_object(Body=w_p.to_json() ,Bucket='auto-bg', Key='reported.json')
+
     ###Variables
 
     ###Data
@@ -194,7 +194,6 @@ def application():
             Discover the concept for your next favorite game!
                         
             How do you use Auto-BG?
-
             Pick any set of tags from four selectors below: Family, Game, Mechanic, and Category.
             If you are looking to lose together - activate the cooperative toggle.
             
@@ -424,20 +423,22 @@ def about_us():
 def feedback():
     import pandas as pd
     from pathlib import Path
-    
+
+    session = boto3.Session(aws_access_key_id=st.secrets.accesskey, aws_secret_access_key=st.secrets.secretaccesskey)
+
     st.subheader('Leave comments below')
 
     with st.form('feed',clear_on_submit=True):
         f = st.text_area('Feedback')
         sub = st.form_submit_button('Submit')
-    
+            
         if sub:
-            feed_ser = pd.read_csv(Path(__file__).parent / "Persistent_Data/Feedback.csv")
-            f_s = pd.Series(f)
-            feed_ser = feed_ser.append(f_s, ignore_index=True)
-            feed_ser.to_csv(Path(__file__).parent / "Persistent_Data/Feedback.csv")
-
-
+            s3=session.client('s3')
+            feedbackcsv = s3.get_object(Bucket='auto-bg', Key='Feedback.csv')
+            f_f = pd.read_csv(feedbackcsv.get("Body"))
+            f_s = pd.DataFrame({'feedback':f}, index=[0])
+            f_f = pd.concat([f_f, f_s])
+            s3.put_object(Body=f_f.to_csv() ,Bucket='auto-bg', Key='Feedback.csv')
 
 
 with tab1:
