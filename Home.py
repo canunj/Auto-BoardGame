@@ -357,20 +357,19 @@ def application():
             st.button('Report', on_click=report, use_container_width=True)
 
 def blog():
-    """
-    Blog describing the Auto-BG project
-    """
+    from pathlib import Path
+    
     st.write('### Auto-BG: The Board Game Concept Generator')
     st.write("#### Abstract")
-    st.write("*This application attempts to augment one step, early in that journey, when the seeds of an idea combine and sprout into a holistic concept.\
-             By interpreting disparate mechanical and descriptive tags to identify a game concept, Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
-             These descriptions support designers-to-be as alternatives to current concepts, seeds for future concepts, or any user as, hopefully, an entertaining thought experiment.\
-             More information included in the associated paper.*")
+    st.write("*This application augments one step in the board game design process by generating potential full game concepts from a collection of descriptive tags.\
+             Auto-BG uses a custom pipeline of GPT3 and T5 models to create a new description and proposed titles for a game that doesn't exist today.\
+             These concepts support general users and designers-to-be as alternatives to current concepts, seeds for future concepts, or an entertaining thought experiment.*")
     
     # Code adapted from "Display and Download PDF in Streamlit: A Blog Use Case" by My Data Talk, https://towardsdatascience.com/display-and-download-pdf-in-streamlit-a-blog-use-case-5fc1ac87d4b1
-    with open('Auto_BG_blog.pdf', "rb") as blog_file:
+    path = Path(__file__).parent / 'Auto_BG_Blog.pdf'
+    with open(path, "rb") as blog_file:
         blog_pdf = base64.b64encode(blog_file.read()).decode('utf-8')
-        blog_display = f'<center><iframe src="data:application/pdf;base64,{blog_pdf}" width=800 height=800 type="application/pdf"></iframe><center>'
+        blog_display = f'<center><iframe src="data:application/pdf;base64,{blog_pdf}" width=100% height=800 type="application/pdf"></iframe><center>'
 
     st.markdown(blog_display, unsafe_allow_html=True)
 
@@ -382,8 +381,8 @@ def about_us():
     """
 
     st.write('### Creators of Auto-BG')
-    st.write('*With a shared love of data science and board games, we came together and created Auto-BG as part of our Capstone project\
-             for our "Master of Applied Data Science" program at the University of Michigan.\
+    st.write('*With a shared love of data science and board games, we came together and created Auto-BG as a Capstone project\
+             in the "Master of Applied Data Science" program at the University of Michigan.\
              We hope you enjoy!*')
     st.write("\n")
 
@@ -396,7 +395,7 @@ def about_us():
         st.write("""
         **University of Michigan**\n
         ***Master of Applied Data Science, Class of 2023***\n
-        Trained & implemented text and title models for Auto-BG, and led drafting and revision for blog.\n
+        N. Canu trained, evaluated, & implemented pipeline classes text and title generator models for Auto-BG.\n 
         Their current board game obsession is Obsession by Kayenta Games.
         """)
     
@@ -406,7 +405,7 @@ def about_us():
         st.write("""
         **University of Michigan**\n
         ***Master of Applied Data Science, Class of 2023***\n
-        Scoped and designed the Auto-BG UI,and implemented the integrated Streamlit application for Auto-BG.\n
+        T. Druhot scoped and designed the Streamlit application. He also built the UI front end & title generator final module, and integrated modules into live application.\n 
         Avid Magic the Gathering Limited player and deck/engine building board games.
         """)
 
@@ -416,7 +415,7 @@ def about_us():
         st.write("""
         **University of Michigan**\n
         ***Master of Applied Data Science, Class of 2023***\n
-        Led literature reviews, assisted with practical model research, visualizations, & UI components.\n
+        S. Capp contributed research, text generator prototyping, streamlit application modules, and visualizations.\n 
         Immense fan of Catan, Coup, and any deduction games.
         """)
 
