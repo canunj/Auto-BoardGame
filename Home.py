@@ -142,17 +142,15 @@ def application():
     def report():       
         inputs = '|'.join(str(x) for x in st.session_state.inputs) 
         data = {'rprtd':  date.today(),'inpts': inputs, 'title': st.session_state.output_dict[st.session_state.desc_iter]['titles'][st.session_state.title_iter][0], 'desc':st.session_state.output_dict[st.session_state.desc_iter]['text']}
-        r_df = pd.DataFrame(data, index=[0])
-        try:
-            s3=session.client('s3')
-            reportedjson = s3.get_object(Bucket='auto-bg', Key='reported.json')
-            r_d = pd.read_json(reportedjson.get("Body"))
-            w_p = pd.concat([r_df, r_d])
-            w_p = w_p.drop_duplicates()
-            s3.put_object(Body=w_p.to_json() ,Bucket='auto-bg', Key='reported.json')
-        except: 
-            s3.put_object(Body=r_df.to_json() ,Bucket='auto-bg', Key='reported.json')
-    
+
+        s3=session.client('s3')
+        reportedjson = s3.get_object(Bucket='auto-bg', Key='reported.json')
+        r_d = pd.read_json(reportedjson.get("Body"))
+        r_df = pd.DataFrame(data, index=[len(r_d)+1])
+        w_p = pd.concat([r_df, r_d])
+        w_p = w_p.drop_duplicates().reset_index(drop=True)
+        s3.put_object(Body=w_p.to_json() ,Bucket='auto-bg', Key='reported.json')
+
     ###Variables
 
     ###Data
