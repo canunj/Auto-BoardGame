@@ -1,6 +1,7 @@
 import streamlit as st
 import base64
 import boto3
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title='Auto-BG: The Game Concept Generator', layout='wide')
 
@@ -357,8 +358,6 @@ def application():
             st.button('Report', on_click=report, use_container_width=True)
 
 def blog():
-    from pathlib import Path
-    
     st.write('### Auto-BG: The Board Game Concept Generator')
     st.write("#### Abstract")
     st.write("*This application augments one step in the board game design process by generating potential full game concepts from a collection of descriptive tags.\
@@ -366,12 +365,8 @@ def blog():
              These concepts support general users and designers-to-be as alternatives to current concepts, seeds for future concepts, or an entertaining thought experiment.*")
     
     # Code adapted from "Display and Download PDF in Streamlit: A Blog Use Case" by My Data Talk, https://towardsdatascience.com/display-and-download-pdf-in-streamlit-a-blog-use-case-5fc1ac87d4b1
-    path = Path(__file__).parent / 'Auto_BG_Blog.pdf'
-    with open(path, "rb") as blog_file:
-        blog_pdf = base64.b64encode(blog_file.read()).decode('utf-8')
-        blog_display = f'<center><iframe src="data:application/pdf;base64,{blog_pdf}" width=100% height=800 type="application/pdf"></iframe><center>'
-
-    st.markdown(blog_display, unsafe_allow_html=True)
+    blog_src = "https://docs.google.com/document/d/1iYbqHz2-J0k4cNPt7GL2HB85xEwV9cP4_qWUgiZ8_oc/edit?usp=sharing"
+    components.iframe(src=blog_src, height=800, scrolling=True)
 
 
 
